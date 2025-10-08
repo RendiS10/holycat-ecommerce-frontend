@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+This is the Next.js frontend for the holycat-ecommerce sample app. It uses the App Router and Tailwind CSS for layout and styling.
 
-## Getting Started
+Features implemented
 
-First, run the development server:
+- Product listing and product detail pages.
+- Register and Login pages wired to the backend auth endpoints.
+- Cart UI with add/view/update/remove operations.
+- Global toast notifications (`ToastProvider`) used for success/error messages.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+Quickstart (frontend)
+
+1. Install dependencies
+
+```powershell
+cd ecommerce-frontend
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Start the dev server
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+```powershell
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open http://localhost:3000 in the browser. The frontend is typically served on port 3000.
 
-## Learn More
+Connecting to the backend
 
-To learn more about Next.js, take a look at the following resources:
+- The frontend expects the backend API at `http://localhost:4000` by default. The backend must be running for auth and cart flows to work.
+- Because the backend sets an httpOnly cookie on login, the frontend must send credentials with requests. The code calls axios with `withCredentials: true` so that cookies are included automatically.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Pages & Components
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `app/page.js` — homepage
+- `app/products` — product listing
+- `app/products/[id]` — product detail with `AddToCartButton` component
+- `app/login/page.js` — login form (show/hide password, toasts on success/error)
+- `app/register/page.js` — register form (show/hide password, toasts)
+- `app/cart/page.js` — cart view with quantity controls and remove
+- `app/components/ToastProvider.js` — global toast system (listens for `window.dispatchEvent(new CustomEvent('toast', { detail }))`)
+- `app/components/Header.js` — header that shows auth state and cart count (listens for `authChanged` and `cartUpdated` events).
 
-## Deploy on Vercel
+Notes and recommendations
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- The app uses cookie-based auth (httpOnly cookie). For this reason you should enable CORS with credentials on the backend (already done in the sample) and keep using `withCredentials` on frontend requests.
+- Because cookies are used, add CSRF protection before deploying to production (e.g. double-submit token or `csurf`).
+- Product images are currently placeholders — to show real product images, update the backend seed or product records with image URLs and adjust `ProductCard` to render them.
+- The toast system is implemented as a simple global listener — you can replace it with a library like react-hot-toast if you prefer.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Build & deploy
+
+```powershell
+# build
+npm run build
+
+# preview
+npm run start
+```
+
+Testing & development tips
+
+- Start the backend first (see `ecommerce-backend/README.md`), then start the frontend.
+- Use the seeded test user (email: `test@example.com`, password: `secret`) to exercise login + cart flows.
+
+If you'd like, I can add screenshots or a short developer checklist (how to add images, enable HTTPS locally, or run Playwright e2e). Tell me which you'd prefer.

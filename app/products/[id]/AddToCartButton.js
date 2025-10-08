@@ -3,21 +3,27 @@ import axios from "axios";
 
 export default function AddToCartButton({ productId }) {
   const add = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) return alert("Please login");
     try {
       await axios.post(
         "http://localhost:4000/cart/add",
         { productId, quantity: 1 },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { withCredentials: true }
       );
       try {
         window.dispatchEvent(new Event("cartUpdated"));
       } catch (e) {}
-      alert("Added to cart");
+      window.dispatchEvent(
+        new CustomEvent("toast", {
+          detail: { message: "Added to cart", type: "success" },
+        })
+      );
     } catch (err) {
       console.error(err);
-      alert("Failed to add to cart");
+      window.dispatchEvent(
+        new CustomEvent("toast", {
+          detail: { message: "Failed to add to cart", type: "error" },
+        })
+      );
     }
   };
 

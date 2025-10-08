@@ -11,14 +11,8 @@ export default function Header() {
 
   const fetchCount = async () => {
     try {
-      const token =
-        typeof window !== "undefined" && localStorage.getItem("token");
-      if (!token) {
-        setCount(0);
-        return;
-      }
       const res = await axios.get("http://localhost:4000/cart", {
-        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
       });
       const items = res.data?.items || [];
       setCount(items.reduce((s, i) => s + i.quantity, 0));
@@ -29,13 +23,22 @@ export default function Header() {
 
   useEffect(() => {
     fetchCount();
-    const token =
-      typeof window !== "undefined" && localStorage.getItem("token");
-    setIsAuth(!!token);
+    // check auth via /auth/me
+    const checkAuth = async () => {
+      try {
+        await axios.get("http://localhost:4000/auth/me", {
+          withCredentials: true,
+        });
+        setIsAuth(true);
+      } catch (err) {
+        setIsAuth(false);
+      }
+    };
+    checkAuth();
 
     const handler = () => fetchCount();
     window.addEventListener("cartUpdated", handler);
-    const authHandler = () => setIsAuth(!!localStorage.getItem("token"));
+    const authHandler = () => checkAuth();
     window.addEventListener("authChanged", authHandler);
     return () => {
       window.removeEventListener("cartUpdated", handler);
@@ -45,7 +48,15 @@ export default function Header() {
 
   const logout = () => {
     if (typeof window === "undefined") return;
-    localStorage.removeItem("token");
+    try {
+      axios
+        .post(
+          "http://localhost:4000/auth/logout",
+          {},
+          { withCredentials: true }
+        )
+        .catch(() => {});
+    } catch (e) {}
     setCount(0);
     setIsAuth(false);
     window.dispatchEvent(new Event("cartUpdated"));
