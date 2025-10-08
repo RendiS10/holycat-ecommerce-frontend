@@ -1,8 +1,11 @@
 "use client";
 import Link from "next/link";
 import axios from "axios";
+import { useRouter } from "next/navigation"; // Impor useRouter
 
 export default function ProductCard({ product }) {
+  const router = useRouter(); // Inisialisasi router
+
   const addToCart = async () => {
     try {
       await axios.post(
@@ -10,10 +13,13 @@ export default function ProductCard({ product }) {
         { productId: product.id, quantity: 1 },
         { withCredentials: true }
       );
-      // notify other parts of the UI (header, cart page)
+
+      // Memberi notifikasi ke komponen lain (misalnya Header)
       try {
         window.dispatchEvent(new Event("cartUpdated"));
       } catch (e) {}
+
+      // Menampilkan notifikasi sukses
       window.dispatchEvent(
         new CustomEvent("toast", {
           detail: { message: "Added to cart", type: "success" },
@@ -21,6 +27,21 @@ export default function ProductCard({ product }) {
       );
     } catch (err) {
       console.error(err);
+
+      // Logika Penanganan Error 401
+      if (err?.response?.status === 401) {
+        window.dispatchEvent(
+          new CustomEvent("toast", {
+            detail: {
+              message: "Please login to add items to cart.",
+              type: "error",
+            },
+          })
+        );
+        router.push("/login"); // Arahkan ke halaman login
+        return;
+      }
+      // Penanganan error selain 401
       window.dispatchEvent(
         new CustomEvent("toast", {
           detail: { message: "Failed to add to cart", type: "error" },

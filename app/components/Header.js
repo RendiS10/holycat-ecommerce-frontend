@@ -7,6 +7,7 @@ import axios from "axios";
 export default function Header() {
   const [count, setCount] = useState(0);
   const [isAuth, setIsAuth] = useState(false);
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const router = useRouter();
 
   const fetchCount = async () => {
@@ -23,8 +24,9 @@ export default function Header() {
 
   useEffect(() => {
     fetchCount();
-    // check auth via /auth/me
+
     const checkAuth = async () => {
+      setIsLoadingAuth(true);
       try {
         await axios.get("http://localhost:4000/auth/me", {
           withCredentials: true,
@@ -32,6 +34,8 @@ export default function Header() {
         setIsAuth(true);
       } catch (err) {
         setIsAuth(false);
+      } finally {
+        setIsLoadingAuth(false);
       }
     };
     checkAuth();
@@ -46,19 +50,33 @@ export default function Header() {
     };
   }, []);
 
-  const logout = () => {
+  // PERUBAHAN UTAMA: Fungsi logout dibuat async
+  const logout = async () => {
     if (typeof window === "undefined") return;
+
     try {
-      axios
-        .post(
-          "http://localhost:4000/auth/logout",
-          {},
-          { withCredentials: true }
-        )
-        .catch(() => {});
-    } catch (e) {}
+      // WAJIB: Tunggu (await) respons dari backend sebelum membersihkan state
+      await axios.post(
+        "http://localhost:4000/auth/logout",
+        {},
+        { withCredentials: true }
+      );
+    } catch (err) {
+      // Meskipun API call gagal (misal server down), kita tetap perlu membersihkan state
+      console.error("Logout API failed, continuing local cleanup:", err);
+    }
+
+    // 1. Pembersihan State Lokal
     setCount(0);
     setIsAuth(false);
+
+    // 2. Hapus token fallback development
+    try {
+      sessionStorage.removeItem("dev_token");
+      delete axios.defaults.headers.common["Authorization"];
+    } catch (e) {}
+
+    // 3. Dispatch events & Redirect (terjadi setelah API call selesai)
     window.dispatchEvent(new Event("cartUpdated"));
     window.dispatchEvent(new Event("authChanged"));
     router.push("/");
@@ -77,7 +95,10 @@ export default function Header() {
           <Link href="/cart" className="text-sm text-gray-700">
             Cart{count > 0 ? ` (${count})` : ""}
           </Link>
-          {!isAuth ? (
+
+          {isLoadingAuth ? (
+            <div className="w-20 h-8 bg-gray-200 rounded animate-pulse"></div>
+          ) : !isAuth ? (
             <>
               <Link href="/login" className="text-sm text-gray-700">
                 Login

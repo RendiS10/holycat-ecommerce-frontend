@@ -38,6 +38,16 @@ export default function LoginPage() {
       // notify other components of auth change (server set cookie)
       if (typeof window !== "undefined")
         window.dispatchEvent(new Event("authChanged"));
+      // development fallback: server may return token in response body
+      try {
+        const devToken = res?.data?.token;
+        if (devToken && typeof window !== "undefined") {
+          // keep in sessionStorage so it doesn't persist across browser restarts
+          sessionStorage.setItem("dev_token", devToken);
+          // set axios default for Authorization so subsequent requests work
+          axios.defaults.headers.common["Authorization"] = `Bearer ${devToken}`;
+        }
+      } catch (e) {}
       // show a friendly toast
       if (typeof window !== "undefined")
         window.dispatchEvent(
@@ -45,7 +55,8 @@ export default function LoginPage() {
             detail: { message: "Welcome back!", type: "success" },
           })
         );
-      router.push("/products");
+      // PERUBAHAN: Diarahkan ke homepage (/)
+      router.push("/");
     } catch (err) {
       // Log the full error for debugging (AxiosError can be nested)
       try {

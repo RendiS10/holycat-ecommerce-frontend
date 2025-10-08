@@ -68,8 +68,9 @@ export default function RegisterPage() {
           <input
             placeholder="Name"
             {...register("name", { required: true })}
+            // PERBAIKAN: Memanggil register("name").ref(e) di dalam callback
             ref={(e) => {
-              register("name");
+              register("name").ref(e);
               nameRef.current = e;
             }}
             className="p-3 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-300"

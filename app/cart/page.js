@@ -26,6 +26,10 @@ export default function CartPage() {
     }
   };
 
+  const router = require("next/navigation").useRouter
+    ? require("next/navigation").useRouter()
+    : null;
+
   useEffect(() => {
     fetchCart();
   }, []);
@@ -46,10 +50,22 @@ export default function CartPage() {
       } catch (e) {}
     } catch (err) {
       console.error(err);
-      const msg = err?.response?.data?.error || "Failed to update";
-      window.dispatchEvent(
-        new CustomEvent("toast", { detail: { message: msg, type: "error" } })
-      );
+      const status = err?.response?.status;
+      if (status === 401) {
+        window.dispatchEvent(
+          new CustomEvent("toast", {
+            detail: { message: "Please login to update cart", type: "error" },
+          })
+        );
+        try {
+          router?.push("/login");
+        } catch (e) {}
+      } else {
+        const msg = err?.response?.data?.error || "Failed to update";
+        window.dispatchEvent(
+          new CustomEvent("toast", { detail: { message: msg, type: "error" } })
+        );
+      }
     } finally {
       setUpdating((s) => {
         const copy = { ...s };
@@ -77,10 +93,22 @@ export default function CartPage() {
       );
     } catch (err) {
       console.error(err);
-      const msg = err?.response?.data?.error || "Failed to remove";
-      window.dispatchEvent(
-        new CustomEvent("toast", { detail: { message: msg, type: "error" } })
-      );
+      const status = err?.response?.status;
+      if (status === 401) {
+        window.dispatchEvent(
+          new CustomEvent("toast", {
+            detail: { message: "Please login to modify cart", type: "error" },
+          })
+        );
+        try {
+          router?.push("/login");
+        } catch (e) {}
+      } else {
+        const msg = err?.response?.data?.error || "Failed to remove";
+        window.dispatchEvent(
+          new CustomEvent("toast", { detail: { message: msg, type: "error" } })
+        );
+      }
     } finally {
       setUpdating((s) => {
         const copy = { ...s };
