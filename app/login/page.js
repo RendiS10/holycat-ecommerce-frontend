@@ -3,6 +3,16 @@ import { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Header from "../components/Header"; // <-- Import Header
+
+// Definisikan konstanta warna
+const COLOR_PRIMARY_GREEN = "text-[#44af7c]";
+const COLOR_PRIMARY_YELLOW_BG = "bg-[#ffbf00]";
+const COLOR_LIGHT_GREEN_BG = "bg-[#e8f5ef]";
+const COLOR_TEXT_DARK = "text-[#2b2b2b]";
+const COLOR_BTN_DEFAULT =
+  "bg-[#44af7c] text-white hover:bg-[#ffbf00] hover:text-[#2b2b2b]";
 
 export default function LoginPage() {
   const {
@@ -17,16 +27,12 @@ export default function LoginPage() {
   const emailRef = useRef(null);
 
   useEffect(() => {
-    // autofocus the email input for faster login
-    try {
-      emailRef.current?.focus();
-    } catch (e) {}
+    emailRef.current?.focus();
   }, []);
 
   const onSubmit = async (data) => {
-    // basic client-side guard
     if (!data.email || !data.password) {
-      setServerError("Please enter email and password");
+      setServerError("Email dan kata sandi diperlukan.");
       return;
     }
     try {
@@ -35,56 +41,32 @@ export default function LoginPage() {
       const res = await axios.post("http://localhost:4000/auth/login", data, {
         withCredentials: true,
       });
-      // notify other components of auth change (server set cookie)
-      if (typeof window !== "undefined")
-        window.dispatchEvent(new Event("authChanged"));
-      // development fallback: server may return token in response body
+
       try {
         const devToken = res?.data?.token;
         if (devToken && typeof window !== "undefined") {
-          // keep in sessionStorage so it doesn't persist across browser restarts
           sessionStorage.setItem("dev_token", devToken);
-          // set axios default for Authorization so subsequent requests work
           axios.defaults.headers.common["Authorization"] = `Bearer ${devToken}`;
         }
       } catch (e) {}
-      // show a friendly toast
+
+      if (typeof window !== "undefined")
+        window.dispatchEvent(new Event("authChanged"));
+
       if (typeof window !== "undefined")
         window.dispatchEvent(
           new CustomEvent("toast", {
-            detail: { message: "Welcome back!", type: "success" },
+            detail: { message: "Selamat datang kembali!", type: "success" },
           })
         );
-      // PERUBAHAN: Diarahkan ke homepage (/)
+
       router.push("/");
     } catch (err) {
-      // Log the full error for debugging (AxiosError can be nested)
-      try {
-        console.error("Login error (full):", err);
-        console.error("Login error response:", err?.response);
-      } catch (e) {
-        // ignore logging failures
-      }
-
-      // Build a friendly message: prefer server error payload, then message
+      console.error("Login error:", err?.response || err);
       const status = err?.response?.status;
-      const data = err?.response?.data;
-      let serverMsg = "";
-      if (data) {
-        if (typeof data === "string") serverMsg = data;
-        else if (data.error) serverMsg = data.error;
-        else {
-          try {
-            serverMsg = JSON.stringify(data);
-          } catch (e) {
-            serverMsg = String(data);
-          }
-        }
-      } else {
-        serverMsg = err?.message || "Login failed";
-      }
+      const msg = err?.response?.data?.error || "Gagal masuk.";
+      const alertMsg = status ? `(${status}) ${msg}` : msg;
 
-      const alertMsg = status ? `(${status}) ${serverMsg}` : serverMsg;
       setServerError(alertMsg);
       if (typeof window !== "undefined")
         window.dispatchEvent(
@@ -97,64 +79,140 @@ export default function LoginPage() {
     }
   };
 
+  const emailRegister = register("email", {
+    required: true,
+    pattern: /^\S+@\S+$/i,
+  });
+  const passwordRegister = register("password", { required: true });
+
   return (
-    <div className="p-6 max-w-md mx-auto">
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h1 className="text-2xl mb-4 font-semibold">Welcome back</h1>
-        <p className="text-sm text-gray-600 mb-4">Login to continue shopping</p>
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3">
-          <input
-            placeholder="Email"
-            {...register("email", { required: true })}
-            ref={(e) => {
-              register("email").ref(e);
-              emailRef.current = e;
-            }}
-            className="p-3 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-300"
-            aria-label="Email"
-            autoComplete="email"
-          />
-          {errors.email && (
-            <span className="text-red-600 text-sm">Email is required</span>
-          )}
-          <div className="relative">
-            <input
-              placeholder="Password"
-              type={showPassword ? "text" : "password"}
-              {...register("password", { required: true })}
-              className="p-3 border rounded w-full pr-12 focus:outline-none focus:ring-2 focus:ring-indigo-300"
-              aria-label="Password"
-              autoComplete="current-password"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword((s) => !s)}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-gray-500 px-2 py-1"
-              aria-pressed={showPassword}
+    <>
+      <Header /> {/* <-- Tampilkan Navbar */}
+      {/* Tambahkan padding-top untuk mengimbangi fixed header */}
+      <section
+        className={`auth-section ${COLOR_LIGHT_GREEN_BG} flex min-h-screen items-center justify-center p-10 md:p-16 pt-[120px]`}
+      >
+        {/* auth-card */}
+        <div
+          className={`max-w-md w-full bg-white p-10 rounded-xl shadow-2xl text-center border-t-8 border-[#44af7c] transition-all duration-600 ease-in-out`}
+        >
+          <div className="auth-header mb-8">
+            {/* auth-icon-circle */}
+            <div
+              className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 ${COLOR_PRIMARY_YELLOW_BG}`}
             >
-              {showPassword ? "Hide" : "Show"}
-            </button>
+              <i
+                className={`fas fa-sign-in-alt text-4xl ${COLOR_TEXT_DARK}`}
+              ></i>
+            </div>
+
+            <h2
+              className={`text-4xl sm:text-5xl font-extrabold ${COLOR_PRIMARY_GREEN} mb-2`}
+            >
+              Masuk ke Akun Anda
+            </h2>
+
+            <p className={`text-2xl ${COLOR_TEXT_DARK} opacity-80 m-0`}>
+              Selamat datang kembali!
+            </p>
           </div>
-          {errors.password && (
-            <span className="text-red-600 text-sm">Password is required</span>
-          )}
-          <button
-            disabled={loading}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded disabled:opacity-60 mt-1"
-          >
-            {loading ? "Logging in..." : "Login"}
-          </button>
-        </form>
-        {/* accessible live region for errors (also covered by toast) */}
-        <div className="sr-only" aria-live="polite">
-          {serverError}
+
+          <form onSubmit={handleSubmit(onSubmit)} className="login-form">
+            {/* Input: Email */}
+            <div className="input-group text-left mb-5">
+              <label
+                htmlFor="email"
+                className={`block text-xl font-bold ${COLOR_TEXT_DARK} mb-1 leading-none`}
+              >
+                <i
+                  className={`fas fa-envelope ${COLOR_PRIMARY_GREEN} mr-2 text-lg`}
+                ></i>{" "}
+                Email
+              </label>
+              <input
+                type="email"
+                id="email"
+                placeholder="nama@email.com"
+                required
+                {...emailRegister}
+                ref={(e) => {
+                  emailRegister.ref(e);
+                  emailRef.current = e;
+                }}
+                className="w-full p-3 border-2 border-gray-300 rounded-lg text-lg focus:border-[#ffbf00] focus:shadow-md transition-all duration-300 outline-none"
+                autoComplete="email"
+              />
+              {errors.email && (
+                <p className="text-red-600 text-sm mt-1">
+                  Email wajib diisi dan harus valid.
+                </p>
+              )}
+            </div>
+
+            {/* Input: Kata Sandi */}
+            <div className="input-group text-left mb-5 relative">
+              <label
+                htmlFor="password"
+                className={`block text-xl font-bold ${COLOR_TEXT_DARK} mb-1 leading-none`}
+              >
+                <i
+                  className={`fas fa-lock ${COLOR_PRIMARY_GREEN} mr-2 text-lg`}
+                ></i>{" "}
+                Kata Sandi
+              </label>
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                placeholder="Kata sandi Anda"
+                required
+                {...passwordRegister}
+                className="w-full p-3 border-2 border-gray-300 rounded-lg text-lg pr-12 focus:border-[#ffbf00] focus:shadow-md transition-all duration-300 outline-none"
+                autoComplete="current-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((s) => !s)}
+                className="absolute right-3 top-1/2 mt-3 text-sm text-gray-500 hover:text-[#44af7c]"
+                aria-pressed={showPassword}
+              >
+                <i
+                  className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"}`}
+                ></i>
+              </button>
+              {errors.password && (
+                <p className="text-red-600 text-sm mt-1">
+                  Kata sandi wajib diisi.
+                </p>
+              )}
+            </div>
+
+            <div className="login-cta">
+              <button
+                type="submit"
+                disabled={loading}
+                className={`auth-btn w-full ${COLOR_BTN_DEFAULT} font-extrabold py-3 px-5 rounded-full text-2xl cursor-pointer transition-all duration-300 mt-3 shadow-md hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                {loading ? "Memuat..." : "Masuk"}
+              </button>
+              {serverError && (
+                <p className="text-red-600 text-lg mt-3">{serverError}</p>
+              )}
+            </div>
+          </form>
+
+          <div className="auth-footer mt-6">
+            <p className="text-xl m-0">
+              Belum punya akun?
+              <Link
+                href="/register"
+                className="text-[#44af7c] font-bold ml-1 hover:text-[#ffbf00] hover:underline transition-colors duration-300"
+              >
+                Daftar di sini
+              </Link>
+            </p>
+          </div>
         </div>
-        <div className="mt-4 text-center text-sm text-gray-600">
-          <a href="/register" className="text-indigo-600 hover:underline">
-            Create an account
-          </a>
-        </div>
-      </div>
-    </div>
+      </section>
+    </>
   );
 }
