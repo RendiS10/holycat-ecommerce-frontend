@@ -4,7 +4,8 @@ import { useForm } from "react-hook-form";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Header from "../components/Header"; // <-- Import Header
+import Header from "../components/Header";
+import { showSwalAlert } from "../lib/swalHelper"; // <-- Import SwalAlert Helper
 
 // Definisikan konstanta warna
 const COLOR_PRIMARY_GREEN = "text-[#44af7c]";
@@ -51,15 +52,13 @@ export default function RegisterPage() {
 
       await axios.post("http://localhost:4000/auth/register", registerData);
 
-      if (typeof window !== "undefined")
-        window.dispatchEvent(
-          new CustomEvent("toast", {
-            detail: {
-              message: "Pendaftaran berhasil. Silakan login.",
-              type: "success",
-            },
-          })
-        );
+      // GANTI TOAST DENGAN SWALALERT SUKSES
+      showSwalAlert(
+        "Pendaftaran Berhasil!",
+        "Akun Anda telah dibuat. Silakan login.",
+        "success"
+      );
+
       router.push("/login");
     } catch (err) {
       console.error("Register error:", err?.response || err);
@@ -67,10 +66,9 @@ export default function RegisterPage() {
         err?.response?.data?.error || err?.response?.data || err?.message;
       const m = typeof msg === "string" ? msg : JSON.stringify(msg);
       setServerError(m);
-      if (typeof window !== "undefined")
-        window.dispatchEvent(
-          new CustomEvent("toast", { detail: { message: m, type: "error" } })
-        );
+
+      // GANTI TOAST DENGAN SWALALERT ERROR
+      showSwalAlert("Gagal Mendaftar", m, "error");
     } finally {
       setLoading(false);
     }
@@ -94,7 +92,7 @@ export default function RegisterPage() {
 
   return (
     <>
-      <Header /> {/* <-- Tampilkan Navbar */}
+      <Header />
       {/* Tambahkan padding-top untuk mengimbangi fixed header */}
       <section
         className={`auth-section ${COLOR_LIGHT_GREEN_BG} flex min-h-screen items-center justify-center p-10 md:p-16 pt-[120px]`}

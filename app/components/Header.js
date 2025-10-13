@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { showLogoutConfirm, showSwalAlert } from "../lib/swalHelper"; // <-- Import SwalAlert Helper
 
 // --- Konstanta Warna Tailwind (Arbitrary Values) ---
 const COLORS = {
@@ -58,7 +59,8 @@ export default function Header() {
     }
   }, []);
 
-  const logout = async () => {
+  // FUNGSI UTAMA LOGOUT (DIPANGGIL JIKA KONFIRMASI DITERIMA)
+  const handleLogout = async () => {
     if (typeof window === "undefined") return;
 
     try {
@@ -82,7 +84,20 @@ export default function Header() {
 
     window.dispatchEvent(new Event("cartUpdated"));
     window.dispatchEvent(new Event("authChanged"));
+
+    // Tampilkan notifikasi SWALALERT SUKSES LOGOUT
+    showSwalAlert(
+      "Berhasil Keluar",
+      "Anda telah berhasil keluar dari akun.",
+      "info"
+    );
+
     router.push("/");
+  };
+
+  // FUNGSI YANG DIPANGGIL TOMBOL: Menampilkan modal konfirmasi
+  const logout = () => {
+    showLogoutConfirm(handleLogout);
   };
 
   // --- FUNGSI TOGGLE MENU (Client Side) ---
@@ -188,11 +203,11 @@ export default function Header() {
           <div className="search-container hidden lg:flex rounded-lg overflow-hidden w-[500px] border-2 border-[#44af7c] shadow-inner shadow-black/50">
             <input
               type="text"
-              className="search-input flex-grow p-[8px] border-none text-[18px] font-bold bg-[#ffff] text-[#ffbf00]placeholder-gray-400 focus:outline-none"
+              className="search-input flex-grow p-[8px] border-none text-[18px] font-bold bg-[#4b5563] text-white placeholder-gray-400 focus:outline-none"
               placeholder="Apa yang bisa kami bantu hari ini?"
             />
             <button
-              className={`search-button bg-[#44af7c] text-white px-[15px] text-[20px] cursor-pointer hover:text-[#ffbf00]`}
+              className={`search-button bg-[${COLORS.PRIMARY_BLUE}] text-white px-[15px] text-[20px] cursor-pointer`}
             >
               <i className="fas fa-search"></i>
             </button>
@@ -200,7 +215,7 @@ export default function Header() {
         </div>
 
         <div className="nav-group-right flex items-center gap-7 text-white">
-          {/* Search Icon Mobile (Tampil di Mobile) - FIX: Menggunakan warna hijau */}
+          {/* Search Icon Mobile */}
           <a
             href="#"
             className={`nav-icon-link search-icon-link lg:hidden text-2xl ${COLOR_PRIMARY_GREEN_CLASS}`}
@@ -209,12 +224,12 @@ export default function Header() {
             <i className="fas fa-search text-2xl"></i>
           </a>
 
-          {/* Cart Link - FIX: Menggunakan warna hijau */}
+          {/* Cart Link */}
           <Link
             href="/cart"
-            className={`nav-icon-link relative flex items-center text-[24px] font-bold pt-[5px] ${COLOR_PRIMARY_GREEN_CLASS} hover:text-[#ffbf00]`}
+            className={`nav-icon-link relative flex items-center text-[24px] font-bold pt-[5px] ${COLOR_PRIMARY_GREEN_CLASS}`}
           >
-            <i className="fas fa-shopping-cart text-2xl "></i>
+            <i className="fas fa-shopping-cart text-2xl"></i>
             <span className="hidden md:inline ml-2">Keranjang</span>
             {count > 0 && (
               <span
@@ -232,7 +247,7 @@ export default function Header() {
             <div className="flex items-center gap-4 text-[24px] font-bold">
               <Link
                 href="/login"
-                className={`text-[#44af7c] hover:text-[#ffbf00] p-1 rounded transition-colors`}
+                className={`text-white hover:text-[#ffbf00] p-1 rounded transition-colors`}
               >
                 Masuk
               </Link>
@@ -254,7 +269,6 @@ export default function Header() {
               <a
                 href="#"
                 onClick={toggleAccountMenu}
-                // FIX: Tambahkan COLOR_PRIMARY_GREEN_CLASS ke Akun Saya
                 className={`nav-icon-link my-account flex items-center text-[24px] font-bold pt-[5px] cursor-pointer ${COLOR_PRIMARY_GREEN_CLASS}`}
               >
                 {/* Placeholder Avatar */}
@@ -290,7 +304,6 @@ export default function Header() {
                 </div>
 
                 <ul className="dropdown-menu-list list-none p-[10px] m-0 text-[22px] font-bold">
-                  {/* FIX: Ikon di dropdown sudah hijau, memastikan kode ini dipertahankan */}
                   <li>
                     <Link
                       href="#"

@@ -4,7 +4,8 @@ import { useForm } from "react-hook-form";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Header from "../components/Header"; // <-- Import Header
+import Header from "../components/Header";
+import { showSwalAlert } from "../lib/swalHelper"; // <-- Import SwalAlert Helper
 
 // Definisikan konstanta warna
 const COLOR_PRIMARY_GREEN = "text-[#44af7c]";
@@ -53,12 +54,8 @@ export default function LoginPage() {
       if (typeof window !== "undefined")
         window.dispatchEvent(new Event("authChanged"));
 
-      if (typeof window !== "undefined")
-        window.dispatchEvent(
-          new CustomEvent("toast", {
-            detail: { message: "Selamat datang kembali!", type: "success" },
-          })
-        );
+      // GANTI TOAST DENGAN SWALALERT SUKSES
+      showSwalAlert("Login Berhasil!", "Selamat datang kembali!", "success");
 
       router.push("/");
     } catch (err) {
@@ -68,12 +65,8 @@ export default function LoginPage() {
       const alertMsg = status ? `(${status}) ${msg}` : msg;
 
       setServerError(alertMsg);
-      if (typeof window !== "undefined")
-        window.dispatchEvent(
-          new CustomEvent("toast", {
-            detail: { message: alertMsg, type: "error" },
-          })
-        );
+      // GANTI TOAST DENGAN SWALALERT ERROR
+      showSwalAlert("Gagal Login", alertMsg, "error");
     } finally {
       setLoading(false);
     }
@@ -87,7 +80,7 @@ export default function LoginPage() {
 
   return (
     <>
-      <Header /> {/* <-- Tampilkan Navbar */}
+      <Header />
       {/* Tambahkan padding-top untuk mengimbangi fixed header */}
       <section
         className={`auth-section ${COLOR_LIGHT_GREEN_BG} flex min-h-screen items-center justify-center p-10 md:p-16 pt-[120px]`}
