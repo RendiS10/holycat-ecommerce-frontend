@@ -188,32 +188,42 @@ export default function Header() {
       {/* BARIS ATAS (LOGO, SEARCH DESKTOP, CART, AUTH) - Warna Gelap */}
       {/* ------------------------------------------------------------------ */}
       <div
+        // Mengubah h-[70px] menjadi h-16 (64px) atau h-18 (72px) agar lebih standar,
+        // tapi h-[70px] tetap dipertahankan jika Anda memang ingin 70px.
+        // Fokus: memastikan `items-center` aktif untuk sejajar vertikal.
         className={`nav-top bg-[${COLORS.DARK_BG}] h-[70px] px-4 md:px-10 flex items-center justify-between relative`}
       >
         <div className="nav-group-left flex items-center gap-5">
-          {/* Logo HolycatStore - Warna Hijau agar Kontras di Background Gelap */}
+          {/* Logo HolycatStore */}
           <Link
             href="/"
+            // Hapus pt-[5px] di sini
             className={`logo-flowbite flex items-center font-['Lilita_One'] text-[30px] md:text-[30px] ${COLOR_PRIMARY_GREEN_CLASS}`}
           >
-            <i className="fas fa-paw mr-1 text-[35px]"></i> HolycatStore
+            <img
+              src="/images/logo.png"
+              alt="HolycatStore Logo"
+              className="h-[55px] w-auto mr-1"
+            />
           </Link>
 
           {/* Search Bar Desktop */}
           <div className="search-container hidden lg:flex rounded-lg overflow-hidden w-[500px] border-2 border-[#44af7c] shadow-inner shadow-black/50">
             <input
               type="text"
-              className="search-input flex-grow p-[8px] border-none text-[18px] font-bold bg-[#4b5563] text-white placeholder-gray-400 focus:outline-none"
+              // Pastikan input memiliki tinggi yang seragam dengan tombol dan elemen lain
+              className="search-input flex-grow p-[8px] border-none text-[18px] font-bold bg-white text-[#4b5563] placeholder-gray-400 focus:outline-none"
               placeholder="Apa yang bisa kami bantu hari ini?"
             />
             <button
-              className={`search-button bg-[${COLORS.PRIMARY_BLUE}] text-white px-[15px] text-[20px] cursor-pointer`}
+              className={`search-button bg-[#44af7c] text-white px-[15px] text-[20px]  hover:text-[#ffbf00] cursor-pointer`}
             >
               <i className="fas fa-search"></i>
             </button>
           </div>
         </div>
 
+        {/* Group Kanan: Search Mobile, Cart, Auth */}
         <div className="nav-group-right flex items-center gap-7 text-white">
           {/* Search Icon Mobile */}
           <a
@@ -227,7 +237,8 @@ export default function Header() {
           {/* Cart Link */}
           <Link
             href="/cart"
-            className={`nav-icon-link relative flex items-center text-[24px] font-bold pt-[5px] ${COLOR_PRIMARY_GREEN_CLASS}`}
+            // Penting: Hapus pt-[5px] di sini untuk menyejajarkan
+            className={`nav-icon-link relative flex items-center text-[24px] font-bold ${COLOR_PRIMARY_GREEN_CLASS} hover:text-[#ffbf00]`}
           >
             <i className="fas fa-shopping-cart text-2xl"></i>
             <span className="hidden md:inline ml-2">Keranjang</span>
@@ -244,16 +255,17 @@ export default function Header() {
           {isLoadingAuth ? (
             <div className="w-20 h-8 bg-gray-600 rounded animate-pulse"></div>
           ) : !isAuth ? (
+            // Bagian ini seharusnya sudah sejajar karena elemennya inline.
             <div className="flex items-center gap-4 text-[24px] font-bold">
               <Link
                 href="/login"
-                className={`text-white hover:text-[#ffbf00] p-1 rounded transition-colors`}
+                className={`text-[#44af7c] hover:text-[#ffbf00] p-1 rounded transition-colors`}
               >
                 Masuk
               </Link>
               <Link
                 href="/register"
-                className={`bg-[${COLORS.YELLOW}] text-[${COLORS.TEXT_DARK}] px-3 py-1 rounded-[30px] hover:bg-[${COLORS.GREEN}] hover:text-white transition-colors text-[24px] font-bold`}
+                className={` text-[#44af7c] px-3 py-1 rounded-[30px] hover:text-[#ffbf00] transition-colors text-[24px] font-bold`}
               >
                 Daftar
               </Link>
@@ -269,7 +281,8 @@ export default function Header() {
               <a
                 href="#"
                 onClick={toggleAccountMenu}
-                className={`nav-icon-link my-account flex items-center text-[24px] font-bold pt-[5px] cursor-pointer ${COLOR_PRIMARY_GREEN_CLASS}`}
+                // Penting: Hapus pt-[5px] di sini untuk menyejajarkan
+                className={`nav-icon-link my-account flex items-center text-[24px] font-bold cursor-pointer ${COLOR_PRIMARY_GREEN_CLASS}`}
               >
                 {/* Placeholder Avatar */}
                 <img
@@ -281,7 +294,7 @@ export default function Header() {
                 <i className="fas fa-caret-down ml-1 text-sm"></i>
               </a>
 
-              {/* Dropdown Menu (Account) */}
+              {/* Dropdown Menu (Account) ... (Tidak diubah) */}
               <div
                 className={`absolute top-full right-0 mt-2 w-[250px] bg-[${
                   COLORS.DROPDOWN_BG
@@ -425,7 +438,7 @@ export default function Header() {
           </Link>
         </div>
 
-        {/* KATEGORI MOBILE DROPDOWN CONTAINER */}
+        {/* KATEGORI MOBILE DROPDOWN CONTAINER ... (Tidak diubah) */}
         <div
           id="mobile-category-menu"
           className={`mobile-category-list absolute top-full left-0 right-0 w-full bg-[${
