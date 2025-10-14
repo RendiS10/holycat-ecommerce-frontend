@@ -319,7 +319,7 @@ export default function Header() {
                 <ul className="dropdown-menu-list list-none p-[10px] m-0 text-[22px] font-bold">
                   <li>
                     <Link
-                      href="#"
+                      href="/profile"
                       className="flex items-center p-2 text-white hover:bg-[#374151]"
                     >
                       <i
