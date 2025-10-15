@@ -61,5 +61,3 @@ Testing & development tips
 
 - Start the backend first (see `ecommerce-backend/README.md`), then start the frontend.
 - Use the seeded test user (email: `test@example.com`, password: `secret`) to exercise login + cart flows.
-
-If you'd like, I can add screenshots or a short developer checklist (how to add images, enable HTTPS locally, or run Playwright e2e). Tell me which you'd prefer.
