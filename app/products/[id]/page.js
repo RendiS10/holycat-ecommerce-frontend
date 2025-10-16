@@ -1,8 +1,14 @@
-import AddToCartButton from "./AddToCartButton";
+import Header from "../../components/Header";
+// Import komponen detail baru
+import ProductDetails from "./ProductDetails";
 
 async function getProduct(id) {
   try {
-    const res = await fetch(`http://localhost:4000/products/${id}`);
+    // ID produk adalah Int, jadi kita parse dulu untuk backend Express.js
+    const numericId = parseInt(id);
+    if (isNaN(numericId)) return null;
+
+    const res = await fetch(`http://localhost:4000/products/${numericId}`);
     if (!res.ok) return null;
     return res.json();
   } catch (err) {
@@ -13,23 +19,37 @@ async function getProduct(id) {
 
 export default async function ProductPage({ params }) {
   const product = await getProduct(params.id);
+
   if (!product) {
     return (
-      <div className="p-6 max-w-2xl mx-auto">
-        <h1 className="text-2xl mb-2">Product not available</h1>
-        <p className="text-sm text-gray-600">
-          Could not load product. The backend may be down.
-        </p>
-      </div>
+      <>
+        <Header />
+        <div className="p-6 pt-[120px] max-w-2xl mx-auto text-center">
+          <h1 className="text-3xl mb-4 font-bold text-red-600">
+            Produk Tidak Ditemukan
+          </h1>
+          <p className="text-lg text-gray-700">
+            Produk dengan ID {params.id} tidak tersedia atau server backend
+            sedang bermasalah.
+          </p>
+          <Link
+            href="/products"
+            className="mt-6 inline-block text-[#44af7c] hover:underline"
+          >
+            &larr; Kembali ke Daftar Produk
+          </Link>
+        </div>
+      </>
     );
   }
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
-      <h1 className="text-2xl mb-2">{product.title}</h1>
-      <p className="text-lg font-semibold mb-4">${product.price.toFixed(2)}</p>
-      <p className="mb-4">{product.description}</p>
-      <AddToCartButton productId={product.id} />
+    <div className="min-h-screen bg-[#f3f4f6]">
+      {" "}
+      {/* Menggunakan warna background NAV_LIGHT_BG */}
+      <Header />
+      {/* Menggunakan komponen baru untuk render detail */}
+      <ProductDetails product={product} />
     </div>
   );
 }

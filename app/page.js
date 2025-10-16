@@ -21,46 +21,121 @@ export default async function Home() {
 
       <main className="max-w-7xl mx-auto px-6 py-12">
         {/* Hero */}
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center mb-12">
-          <div className="lg:col-span-2 bg-gradient-to-r from-sky-700 to-indigo-700 text-white rounded-xl p-10 shadow-lg">
-            <h1 className="text-4xl font-extrabold mb-4">
-              Best Summer Collection
-            </h1>
-            <p className="mb-6 max-w-xl">
-              Discover our curated collection of gadgets, accessories and pet
-              essentials. Quality products at great prices.
+        <section className="relative grid grid-cols-1 lg:grid-cols-3 gap-6 items-center mb-12 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl overflow-hidden">
+          {/* Decorative elements */}
+          <div className="absolute top-10 right-20 w-32 h-32 bg-slate-700/30 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 left-20 w-40 h-40 bg-slate-700/20 rounded-full blur-3xl"></div>
+          <div className="absolute top-1/2 right-1/4 w-2 h-2 bg-white/40 rounded-full"></div>
+          <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-white/30 rounded-full"></div>
+
+          <div className="lg:col-span-2 text-white p-10 lg:p-16 relative z-10">
+            <p className="text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
+              <span className="w-8 h-0.5 bg-red-500"></span>
+              Best Gadget & Gear
             </p>
-            <div className="flex gap-3">
-              <a
-                href="/products"
-                className="bg-white text-indigo-700 font-semibold px-5 py-3 rounded shadow"
-              >
-                Shop Now
-              </a>
-              <a
-                href="#featured"
-                className="border border-white text-white px-5 py-3 rounded"
-              >
-                Featured
-              </a>
-            </div>
+            <h1 className="text-5xl lg:text-6xl font-bold mb-4 leading-tight">
+              Best Summer
+              <br />
+              Collection
+            </h1>
+            <p className="mb-8 max-w-lg text-gray-300">
+              There are many variations of passages of available majority have
+              suffered alteration by injected.
+            </p>
+            <a
+              href="/products"
+              className="inline-block bg-red-500 hover:bg-red-600 text-white font-semibold px-6 py-3 rounded transition-colors"
+            >
+              See All Products
+            </a>
           </div>
 
-          <div className="hidden lg:block lg:col-span-1">
-            <div className="bg-white rounded-xl p-4 shadow">
-              <h3 className="font-semibold mb-2">Weekly Best Deals</h3>
-              <ul className="text-sm space-y-3">
-                <li className="flex justify-between">
-                  <span>Smart Watch</span>
-                  <span className="font-semibold">$120</span>
+          <div className="hidden lg:block lg:col-span-1 p-6 relative z-10">
+            <div className="bg-white rounded-2xl p-6 shadow-xl">
+              <div className="mb-4">
+                <p className="text-xs font-medium text-red-500 mb-1">
+                  Weekly Best Deals
+                </p>
+                <h3 className="text-2xl font-bold text-gray-900">
+                  Save UP to 70%
+                </h3>
+              </div>
+              <button className="w-full bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium px-4 py-2 rounded mb-6 transition-colors flex items-center justify-center gap-2">
+                Shop Now
+                <span>→</span>
+              </button>
+              <ul className="space-y-4">
+                <li className="flex gap-3 items-start">
+                  <div className="w-16 h-16 bg-blue-100 rounded flex-shrink-0 flex items-center justify-center">
+                    <div className="w-10 h-10 bg-blue-200 rounded"></div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-semibold text-sm text-gray-900">
+                      Amazfit GT2 Smart Watch
+                    </h4>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-xs text-gray-400 line-through">
+                        $150.00
+                      </span>
+                      <span className="text-sm font-bold text-gray-900">
+                        $130.00
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 mt-1">
+                      <span className="text-yellow-400 text-xs">★★★★★</span>
+                      <span className="text-xs text-gray-400">
+                        (1.4K Review)
+                      </span>
+                    </div>
+                  </div>
                 </li>
-                <li className="flex justify-between">
-                  <span>Earbuds</span>
-                  <span className="font-semibold">$29</span>
+                <li className="flex gap-3 items-start">
+                  <div className="w-16 h-16 bg-yellow-100 rounded flex-shrink-0 flex items-center justify-center">
+                    <div className="w-10 h-10 bg-yellow-200 rounded"></div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-semibold text-sm text-gray-900">
+                      Apple Smart Watch
+                    </h4>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-xs text-gray-400 line-through">
+                        $150.00
+                      </span>
+                      <span className="text-sm font-bold text-gray-900">
+                        $130.00
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 mt-1">
+                      <span className="text-yellow-400 text-xs">★★★★★</span>
+                      <span className="text-xs text-gray-400">
+                        (1.4K Review)
+                      </span>
+                    </div>
+                  </div>
                 </li>
-                <li className="flex justify-between">
-                  <span>Cat Toy</span>
-                  <span className="font-semibold">$5</span>
+                <li className="flex gap-3 items-start">
+                  <div className="w-16 h-16 bg-pink-100 rounded flex-shrink-0 flex items-center justify-center">
+                    <div className="w-10 h-10 bg-pink-200 rounded"></div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-semibold text-sm text-gray-900">
+                      Kislect Ks Pro Smart Watch
+                    </h4>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-xs text-gray-400 line-through">
+                        $150.00
+                      </span>
+                      <span className="text-sm font-bold text-gray-900">
+                        $130.00
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 mt-1">
+                      <span className="text-yellow-400 text-xs">★★★★★</span>
+                      <span className="text-xs text-gray-400">
+                        (1.4K Review)
+                      </span>
+                    </div>
+                  </div>
                 </li>
               </ul>
             </div>

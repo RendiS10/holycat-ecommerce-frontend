@@ -1,7 +1,12 @@
 "use client";
 import axios from "axios";
+import { useRouter } from "next/navigation";
+import { showSwalAlert } from "../../lib/swalHelper"; // Gunakan SwalAlert untuk notifikasi
 
-export default function AddToCartButton({ productId }) {
+// Tambahkan props 'className' dan 'disabled'
+export default function AddToCartButton({ productId, className, disabled }) {
+  const router = useRouter();
+
   const add = async () => {
     try {
       await axios.post(
@@ -9,27 +14,37 @@ export default function AddToCartButton({ productId }) {
         { productId, quantity: 1 },
         { withCredentials: true }
       );
-      try {
-        window.dispatchEvent(new Event("cartUpdated"));
-      } catch (e) {}
-      window.dispatchEvent(
-        new CustomEvent("toast", {
-          detail: { message: "Added to cart", type: "success" },
-        })
+
+      // Memberi notifikasi global
+      window.dispatchEvent(new Event("cartUpdated"));
+      showSwalAlert(
+        "Sukses",
+        "Produk berhasil ditambahkan ke keranjang!",
+        "success"
       );
     } catch (err) {
       console.error(err);
-      window.dispatchEvent(
-        new CustomEvent("toast", {
-          detail: { message: "Failed to add to cart", type: "error" },
-        })
-      );
+      const status = err?.response?.status;
+
+      if (status === 401) {
+        showSwalAlert(
+          "Akses Ditolak",
+          "Harap login untuk menambahkan item ke keranjang.",
+          "error"
+        );
+        router.push("/login");
+      } else {
+        const msg =
+          err?.response?.data?.error || "Gagal menambahkan ke keranjang.";
+        showSwalAlert("Gagal", msg, "error");
+      }
     }
   };
 
   return (
-    <button onClick={add} className="bg-blue-600 text-white p-2 rounded">
-      Add to cart
+    <button onClick={add} className={className} disabled={disabled}>
+      {/* Teks tombol yang dinamis */}
+      {disabled ? "Stok Habis" : "Tambah ke Keranjang"}
     </button>
   );
 }
