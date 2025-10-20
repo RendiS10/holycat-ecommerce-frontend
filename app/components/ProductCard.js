@@ -56,18 +56,22 @@ export default function ProductCard({ product }) {
       <p className="text-sm text-gray-600 mb-3 line-clamp-2">
         {product.description}
       </p>
-      <div className="mt-auto flex items-center justify-between">
+      <div className="mt-auto flex-column">
         <div className="text-lg font-bold">
           <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
-            ${product.price.toFixed(2)}
+            {new Intl.NumberFormat("id-ID", {
+              style: "currency",
+              currency: "IDR",
+              minimumFractionDigits: 0,
+            }).format(product.price)}
           </span>
         </div>
-        <div className="flex gap-2">
+        <div className="flex justify-center items-center gap-4 p-4 rounded-lg">
           <Link
             href={`/products/${product.id}`}
-            className="text-indigo-600 text-sm"
+            className="text-[#44AF7C] text-sm"
           >
-            View
+            Detail Product
           </Link>
           <button
             onClick={addToCart}
@@ -75,10 +79,10 @@ export default function ProductCard({ product }) {
             className={`px-3 py-1 rounded text-sm ${
               isOutOfStock
                 ? "bg-gray-400 text-gray-800 cursor-not-allowed"
-                : "bg-indigo-600 text-white"
+                : "bg-[#44AF7C] text-white"
             }`}
           >
-            {isOutOfStock ? "Habis" : "Add"}
+            {isOutOfStock ? "Habis" : "Masukan Keranjang"}
           </button>
         </div>
       </div>

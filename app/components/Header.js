@@ -296,9 +296,7 @@ export default function Header() {
 
               {/* Dropdown Menu (Account) ... (Tidak diubah) */}
               <div
-                className={`absolute top-full right-0 mt-2 w-[250px] bg-[${
-                  COLORS.DROPDOWN_BG
-                }] rounded-lg shadow-xl p-0 z-[100] ${
+                className={`absolute top-full right-0 mt-2 w-[250px] bg-[#f3f4f6] rounded-lg shadow-xl p-0 z-[100] ${
                   isAccountOpen ? "block" : "hidden"
                 }`}
               >
@@ -308,10 +306,10 @@ export default function Header() {
                     alt="User Avatar"
                     className="w-12 h-12 rounded-full mx-auto mb-[5px] brightness-125"
                   />
-                  <h4 className="text-[26px] font-extrabold text-white m-0 leading-none">
+                  <h4 className="text-[26px] font-extrabold text-[#2B2B2B] m-0 leading-none">
                     Halo, {userName.split(" ")[0]}
                   </h4>
-                  <p className="text-[18px] text-[#9ca3af] m-0 leading-none">
+                  <p className="text-[18px] text-[#2B2B2B] m-0 leading-none">
                     {userEmail}
                   </p>
                 </div>
@@ -320,7 +318,7 @@ export default function Header() {
                   <li>
                     <Link
                       href="/profile"
-                      className="flex items-center p-2 text-white hover:bg-[#374151]"
+                      className="flex items-center p-2 text-[#2B2B2B] hover:bg-[#374151]"
                     >
                       <i
                         className={`fas fa-user-circle ${COLOR_PRIMARY_GREEN_CLASS} mr-3 text-xl`}
@@ -331,7 +329,7 @@ export default function Header() {
                   <li>
                     <Link
                       href="#"
-                      className="flex items-center p-2 text-white hover:bg-[#374151]"
+                      className="flex items-center p-2 text-[#2B2B2B] hover:bg-[#374151]"
                     >
                       <i
                         className={`fas fa-wallet ${COLOR_PRIMARY_GREEN_CLASS} mr-3 text-xl`}
@@ -342,7 +340,7 @@ export default function Header() {
                   <li>
                     <Link
                       href="#"
-                      className="flex items-center p-2 text-white hover:bg-[#374151]"
+                      className="flex items-center p-2 text-[#2B2B2B] hover:bg-[#374151]"
                     >
                       <i
                         className={`fas fa-truck-moving ${COLOR_PRIMARY_GREEN_CLASS} mr-3 text-xl`}
@@ -353,7 +351,7 @@ export default function Header() {
                   <li>
                     <Link
                       href="#"
-                      className="flex items-center p-2 text-white hover:bg-[#374151]"
+                      className="flex items-center p-2 text-[#2B2B2B] hover:bg-[#374151]"
                     >
                       <i
                         className={`fas fa-home ${COLOR_PRIMARY_GREEN_CLASS} mr-3 text-xl`}
@@ -364,7 +362,7 @@ export default function Header() {
                   <li>
                     <Link
                       href="#"
-                      className="flex items-center p-2 text-white hover:bg-[#374151]"
+                      className="flex items-center p-2 text-[#2B2B2B] hover:bg-[#374151]"
                     >
                       <i
                         className={`fas fa-cog ${COLOR_PRIMARY_GREEN_CLASS} mr-3 text-xl`}
@@ -375,7 +373,7 @@ export default function Header() {
                   <li>
                     <Link
                       href="#"
-                      className="flex items-center p-2 text-white hover:bg-[#374151]"
+                      className="flex items-center p-2 text-[#2B2B2B] hover:bg-[#374151]"
                     >
                       <i
                         className={`fas fa-question-circle ${COLOR_PRIMARY_GREEN_CLASS} mr-3 text-xl`}
@@ -428,13 +426,13 @@ export default function Header() {
             Semua Produk
           </Link>
           <Link href="#" className="hover:text-[#44af7c]">
-            Vitamin Kucing
+            Obat
+          </Link>
+          <Link href="#" className="hover:text-[#44af7c]">
+            Suplemen & Vitamin
           </Link>
           <Link href="#" className="hover:text-[#44af7c]">
             Grooming
-          </Link>
-          <Link href="#" className="hover:text-[#44af7c]">
-            Ide Hadiah
           </Link>
         </div>
 
@@ -458,7 +456,7 @@ export default function Header() {
             </li>
             <li>
               <Link
-                href="/products"
+                href="/"
                 className="block p-3 text-white hover:bg-[#374151] hover:text-[#44af7c]"
               >
                 Semua Produk
