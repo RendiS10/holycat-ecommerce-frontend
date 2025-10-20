@@ -1,12 +1,19 @@
 "use client";
 import Link from "next/link";
 import axios from "axios";
-import { useRouter } from "next/navigation"; // Impor useRouter
+import { useRouter } from "next/navigation";
+import { showSwalAlert } from "../lib/swalHelper"; // Import swalHelper
 
 export default function ProductCard({ product }) {
-  const router = useRouter(); // Inisialisasi router
+  const router = useRouter();
 
   const addToCart = async () => {
+    // Cek stok sebelum menambahkan ke keranjang
+    if (product.stock <= 0) {
+      showSwalAlert("Maaf", "Stok produk tidak tersedia.", "warning");
+      return;
+    }
+
     try {
       await axios.post(
         "http://localhost:4000/cart/add",
@@ -19,36 +26,26 @@ export default function ProductCard({ product }) {
         window.dispatchEvent(new Event("cartUpdated"));
       } catch (e) {}
 
-      // Menampilkan notifikasi sukses
-      window.dispatchEvent(
-        new CustomEvent("toast", {
-          detail: { message: "Added to cart", type: "success" },
-        })
-      );
+      // Menggunakan SwalAlert untuk notifikasi sukses
+      showSwalAlert("Berhasil", "Produk ditambahkan ke keranjang!", "success");
     } catch (err) {
       console.error(err);
 
-      // Logika Penanganan Error 401
       if (err?.response?.status === 401) {
-        window.dispatchEvent(
-          new CustomEvent("toast", {
-            detail: {
-              message: "Please login to add items to cart.",
-              type: "error",
-            },
-          })
+        showSwalAlert(
+          "Akses Ditolak",
+          "Silakan login untuk menambahkan item ke keranjang.",
+          "error"
         );
-        router.push("/login"); // Arahkan ke halaman login
+        router.push("/login");
         return;
       }
-      // Penanganan error selain 401
-      window.dispatchEvent(
-        new CustomEvent("toast", {
-          detail: { message: "Failed to add to cart", type: "error" },
-        })
-      );
+
+      showSwalAlert("Gagal", "Gagal menambahkan produk ke keranjang.", "error");
     }
   };
+
+  const isOutOfStock = product.stock <= 0;
 
   return (
     <div className="bg-white rounded-lg shadow p-4 flex flex-col hover:shadow-2xl transition-shadow duration-200">
@@ -74,9 +71,14 @@ export default function ProductCard({ product }) {
           </Link>
           <button
             onClick={addToCart}
-            className="bg-indigo-600 text-white px-3 py-1 rounded text-sm"
+            disabled={isOutOfStock} // Disable tombol jika stok habis
+            className={`px-3 py-1 rounded text-sm ${
+              isOutOfStock
+                ? "bg-gray-400 text-gray-800 cursor-not-allowed"
+                : "bg-indigo-600 text-white"
+            }`}
           >
-            Add
+            {isOutOfStock ? "Habis" : "Add"}
           </button>
         </div>
       </div>

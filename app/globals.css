@@ -36,5 +36,20 @@
     font-family: "Lilita One", cursive;
     font-weight: 400;
   }
+
+  /* === TAMBAHAN CSS UNTUK MENGHILANGKAN PANAH INPUT ANGKA === */
+
+  /* Untuk browser Firefox */
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+
+  /* Untuk browser Chrome, Safari, Edge, dan Opera */
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
 }
+
 @import "tailwindcss";
