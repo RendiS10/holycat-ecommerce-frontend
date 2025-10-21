@@ -54,9 +54,14 @@ export default function LoginPage() {
       if (typeof window !== "undefined")
         window.dispatchEvent(new Event("authChanged"));
 
-      // GANTI TOAST DENGAN SWALALERT SUKSES
-      showSwalAlert("Login Berhasil!", "Selamat datang kembali!", "success");
+      // Tampilkan notifikasi, DAN TUNGGU hingga ditutup
+      await showSwalAlert(
+        "Login Berhasil!",
+        "Selamat datang kembali!",
+        "success"
+      );
 
+      // Redirect HANYA SETELAH notifikasi ditutup
       router.push("/");
     } catch (err) {
       console.error("Login error:", err?.response || err);
@@ -65,7 +70,6 @@ export default function LoginPage() {
       const alertMsg = status ? `(${status}) ${msg}` : msg;
 
       setServerError(alertMsg);
-      // GANTI TOAST DENGAN SWALALERT ERROR
       showSwalAlert("Gagal Login", alertMsg, "error");
     } finally {
       setLoading(false);
