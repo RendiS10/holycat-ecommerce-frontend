@@ -339,7 +339,7 @@ export default function Header() {
                   </li>
                   <li>
                     <Link
-                      href="#"
+                      href="http://localhost:3000/orders"
                       className="flex items-center p-2 text-[#2B2B2B] hover:bg-[#374151]"
                     >
                       <i
