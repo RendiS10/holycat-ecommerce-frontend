@@ -315,6 +315,21 @@ export default function Header() {
                 </div>
 
                 <ul className="dropdown-menu-list list-none p-[10px] m-0 text-[22px] font-bold">
+                  {/* ==> TAMBAHKAN KODE INI DI SINI <== */}
+                  {user?.role === "ADMIN" && (
+                    <li>
+                      <Link
+                        href="/admin/orders"
+                        className="flex items-center p-2 text-[#2B2B2B] bg-yellow-100 hover:bg-yellow-200"
+                      >
+                        <i
+                          className={`fas fa-shield-halved ${COLOR_PRIMARY_GREEN_CLASS} mr-3 text-xl`}
+                        ></i>{" "}
+                        Admin Dashboard
+                      </Link>
+                    </li>
+                  )}
+                  {/* ==> BATAS TAMBAHAN KODE <== */}
                   <li>
                     <Link
                       href="/profile"

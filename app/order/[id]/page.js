@@ -206,25 +206,35 @@ export default function OrderDetailPage() {
               Item Dipesan
             </h2>
             <ul className="divide-y divide-gray-200 border rounded">
-              {order.items.map((item) => (
-                <li key={item.id} className="flex items-center p-3 gap-3">
-                  <img
-                    src={item.product.image || "/next.svg"}
-                    alt={item.product.title}
-                    className="w-12 h-12 object-cover rounded flex-shrink-0 bg-gray-100"
-                  />
-                  <div className="flex-1 text-sm">
-                    <p className="font-medium">{item.product.title}</p>
-                    <p className="text-gray-500">Jumlah: {item.quantity}</p>
-                  </div>
-                  <div className="text-sm font-semibold text-right">
-                    <p>{formatCurrency(item.price * item.quantity)}</p>
-                    <p className="text-xs text-gray-400">
-                      ({formatCurrency(item.price)}/item)
-                    </p>
-                  </div>
-                </li>
-              ))}
+              {/* ==> TAMBAHKAN Pemeriksaan di sini <== */}
+              {order.items && Array.isArray(order.items) ? (
+                order.items.map((item) => (
+                  <li key={item.id} className="flex items-center p-3 gap-3">
+                    <img
+                      src={item.product?.image || "/next.svg"} // Tambahkan ?. untuk safety
+                      alt={item.product?.title || "Produk tidak ditemukan"} // Tambahkan ?. untuk safety
+                      className="w-12 h-12 object-cover rounded flex-shrink-0 bg-gray-100"
+                    />
+                    <div className="flex-1 text-sm">
+                      <p className="font-medium">
+                        {item.product?.title || "Produk tidak ditemukan"}
+                      </p>{" "}
+                      {/* Tambahkan ?. */}
+                      <p className="text-gray-500">Jumlah: {item.quantity}</p>
+                    </div>
+                    <div className="text-sm font-semibold text-right">
+                      <p>{formatCurrency(item.price * item.quantity)}</p>
+                      <p className="text-xs text-gray-400">
+                        ({formatCurrency(item.price)}/item)
+                      </p>
+                    </div>
+                  </li>
+                ))
+              ) : (
+                <li className="p-3 text-sm text-gray-500">
+                  Tidak ada item dalam pesanan ini.
+                </li> // Fallback jika items tidak ada
+              )}
             </ul>
           </div>
 
