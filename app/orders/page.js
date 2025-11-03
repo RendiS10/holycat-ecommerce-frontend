@@ -5,9 +5,27 @@ import { useRouter } from "next/navigation";
 import Header from "../components/Header";
 import { showSwalAlert } from "../lib/swalHelper";
 import Link from "next/link";
-import Swal from "sweetalert2"; // <-- Impor Swal
+import Swal from "sweetalert2";
 
-// Helper (tidak berubah)
+// [MODIFIKASI] Helper (Gunakan underscore agar konsisten dengan DB)
+const getStatusStyle = (status) => {
+  switch (status) {
+    case "Selesai":
+      return "bg-green-100 text-green-700";
+    case "Dikirim":
+      return "bg-blue-100 text-blue-700";
+    case "Dikemas":
+      return "bg-indigo-100 text-indigo-700";
+    case "Diproses":
+      return "bg-purple-100 text-purple-700";
+    case "Dibatalkan":
+      return "bg-red-100 text-red-700";
+    case "Menunggu_Pembayaran":
+    default:
+      return "bg-yellow-100 text-yellow-700";
+  }
+};
+// Helper lain (tidak berubah)
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -18,21 +36,6 @@ const formatCurrency = (amount) => {
 const formatDate = (dateString) => {
   const options = { year: "numeric", month: "short", day: "numeric" };
   return new Date(dateString).toLocaleDateString("id-ID", options);
-};
-const getStatusStyle = (status) => {
-  switch (status) {
-    case "PAID":
-      return "bg-green-100 text-green-700";
-    case "SHIPPED":
-      return "bg-blue-100 text-blue-700";
-    case "COMPLETED":
-      return "bg-purple-100 text-purple-700";
-    case "CANCELLED":
-      return "bg-red-100 text-red-700";
-    case "PENDING":
-    default:
-      return "bg-yellow-100 text-yellow-700";
-  }
 };
 
 export default function OrdersPage() {
@@ -68,16 +71,14 @@ export default function OrdersPage() {
     fetchOrders();
   }, [fetchOrders]);
 
-  // --- [BARU] Fungsi untuk menghapus order ---
+  // Fungsi untuk menghapus order (Tidak berubah)
   const handleDeleteOrder = async (e, orderId) => {
-    // Menghentikan event klik agar tidak pindah halaman (karena tombol ada di dalam Link)
     e.stopPropagation();
     e.preventDefault();
 
-    // Tampilkan konfirmasi
     const result = await Swal.fire({
-      title: "Hapus Pesanan?",
-      text: `Anda yakin ingin menghapus pesanan #${orderId}? Tindakan ini tidak dapat dibatalkan.`,
+      title: "Hapus Riwayat?",
+      text: `Anda yakin ingin menghapus riwayat pesanan #${orderId}?`,
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
@@ -87,23 +88,19 @@ export default function OrdersPage() {
     });
 
     if (!result.isConfirmed) {
-      return; // Batalkan jika pengguna menekan "Batal"
+      return;
     }
 
     try {
-      // Panggil API DELETE
       await axios.delete(`http://localhost:4000/orders/${orderId}`, {
         withCredentials: true,
       });
-
-      // Hapus order dari state lokal untuk update UI instan
       setOrders((prevOrders) =>
         prevOrders.filter((order) => order.id !== orderId)
       );
-
       showSwalAlert(
         "Berhasil Dihapus",
-        `Pesanan #${orderId} telah dihapus.`,
+        `Riwayat pesanan #${orderId} telah dihapus.`,
         "success"
       );
     } catch (err) {
@@ -138,69 +135,78 @@ export default function OrdersPage() {
               {orders.map((order) => {
                 const statusStyle = getStatusStyle(order.status);
                 const firstItem = order.items?.[0]?.product;
+
+                // [LOGIKA BARU] Tentukan apakah tombol hapus boleh tampil
+                const canDelete =
+                  order.status === "Selesai" || order.status === "Dibatalkan";
+
                 return (
-                  // Link tetap membungkus kartu, tapi tombol di dalamnya akan menghentikan propagasi klik
-                  <Link
-                    href={`/order/${order.id}`}
+                  <div
                     key={order.id}
-                    className="block hover:shadow-lg transition-shadow duration-200"
+                    className="bg-white rounded-lg shadow border flex flex-col sm:flex-row gap-4 items-center p-4"
                   >
-                    <div className="bg-white p-4 rounded-lg shadow border flex flex-col sm:flex-row gap-4 items-center">
-                      {/* Preview Gambar (tidak berubah) */}
-                      {firstItem?.image && (
+                    {/* Preview Gambar */}
+                    <div className="w-16 h-16 bg-gray-100 rounded flex-shrink-0 flex items-center justify-center text-gray-400 text-xs">
+                      {firstItem?.image ? (
                         <img
                           src={firstItem.image}
                           alt={firstItem.title}
-                          className="w-16 h-16 object-cover rounded bg-gray-100 flex-shrink-0"
+                          className="w-full h-full object-cover rounded"
                         />
+                      ) : (
+                        <span>No Image</span>
                       )}
-                      {!firstItem?.image && (
-                        <div className="w-16 h-16 bg-gray-100 rounded flex-shrink-0 flex items-center justify-center text-gray-400 text-xs">
-                          No Image
-                        </div>
-                      )}
+                    </div>
 
-                      {/* Info Order (tidak berubah) */}
-                      <div className="flex-1">
-                        <div className="flex justify-between items-center mb-1">
-                          <span className="font-semibold text-lg text-[#2b2b2b]">
-                            Order #{order.id}
-                          </span>
-                          <span
-                            className={`px-2 py-0.5 text-xs font-medium rounded-full ${statusStyle}`}
-                          >
-                            {order.status}
-                          </span>
-                        </div>
-                        <p className="text-sm text-gray-500 mb-2">
-                          {formatDate(order.createdAt)} -{" "}
-                          {formatCurrency(order.total)} -{" "}
-                          {order.paymentMethod?.replace("_", " ") || "N/A"}
-                        </p>
-                        {firstItem && (
-                          <p className="text-sm text-gray-600 truncate">
-                            {firstItem.title}
-                          </p>
-                        )}
+                    {/* Info Order (Dibungkus Link) */}
+                    <Link
+                      href={`/order/${order.id}`}
+                      className="flex-1 block hover:bg-gray-50 p-2 rounded -m-2"
+                    >
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="font-semibold text-lg text-[#2b2b2b]">
+                          Order #{order.id}
+                        </span>
+                        <span
+                          className={`px-2 py-0.5 text-xs font-medium rounded-full ${statusStyle}`}
+                        >
+                          {order.status.replace("_", " ")}
+                        </span>
                       </div>
+                      <p className="text-sm text-gray-500 mb-2">
+                        {formatDate(order.createdAt)} -{" "}
+                        {formatCurrency(order.total)} -{" "}
+                        {order.paymentMethod?.replace("_", " ") || "N/A"}
+                      </p>
+                      {firstItem && (
+                        <p className="text-sm text-gray-600 truncate">
+                          {firstItem.title}
+                        </p>
+                      )}
+                    </Link>
 
-                      {/* [MODIFIKASI] Panah ke Detail & Tombol Hapus */}
-                      <div className="self-center ml-auto flex items-center gap-4">
-                        {/* Tombol Hapus Baru */}
+                    {/* [MODIFIKASI] Tombol Hapus (Hanya tampil jika Selesai/Dibatalkan) */}
+                    <div className="self-center ml-auto pl-2">
+                      {canDelete && (
                         <button
                           onClick={(e) => handleDeleteOrder(e, order.id)}
-                          className="text-gray-400 hover:text-red-600 p-2 z-10 relative" // z-10 agar bisa diklik di atas Link
-                          title="Hapus pesanan"
+                          className="text-gray-400 hover:text-red-600 p-2"
+                          title="Hapus riwayat pesanan"
                         >
                           <i className="fas fa-trash-alt"></i>
                         </button>
-                        {/* Panah Navigasi */}
-                        <div className="text-gray-400">
+                      )}
+                      {!canDelete && (
+                        // Tampilkan panah jika tidak bisa dihapus, agar tetap konsisten
+                        <Link
+                          href={`/order/${order.id}`}
+                          className="text-gray-400 p-2"
+                        >
                           <i className="fas fa-chevron-right"></i>
-                        </div>
-                      </div>
+                        </Link>
+                      )}
                     </div>
-                  </Link>
+                  </div>
                 );
               })}
             </div>

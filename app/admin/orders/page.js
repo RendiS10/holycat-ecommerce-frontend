@@ -6,7 +6,25 @@ import Header from "../../components/Header";
 import { showSwalAlert } from "../../lib/swalHelper";
 import Link from "next/link";
 
-// Helper dari halaman orders/page.js
+// [MODIFIKASI] Helper untuk style status (sesuai Enum baru)
+const getStatusStyle = (status) => {
+  switch (status) {
+    case "Selesai":
+      return "bg-green-100 text-green-700";
+    case "Dikirim":
+      return "bg-blue-100 text-blue-700";
+    case "Dikemas":
+      return "bg-indigo-100 text-indigo-700";
+    case "Diproses":
+      return "bg-purple-100 text-purple-700";
+    case "Dibatalkan":
+      return "bg-red-100 text-red-700";
+    case "Menunggu_Pembayaran":
+    default:
+      return "bg-yellow-100 text-yellow-700";
+  }
+};
+// Helper lain (tidak berubah)
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -24,23 +42,16 @@ const formatDate = (dateString) => {
   };
   return new Date(dateString).toLocaleDateString("id-ID", options);
 };
-const getStatusStyle = (status) => {
-  switch (status) {
-    case "PAID":
-      return "bg-green-100 text-green-700";
-    case "SHIPPED":
-      return "bg-blue-100 text-blue-700";
-    case "COMPLETED":
-      return "bg-purple-100 text-purple-700";
-    case "CANCELLED":
-      return "bg-red-100 text-red-700";
-    case "PENDING":
-    default:
-      return "bg-yellow-100 text-yellow-700";
-  }
-};
-// Ambil semua nilai dari OrderStatus enum
-const allStatuses = ["PENDING", "PAID", "SHIPPED", "COMPLETED", "CANCELLED"];
+
+// [MODIFIKASI] Ambil semua nilai dari OrderStatus enum baru (gunakan underscore)
+const allStatuses = [
+  "Menunggu_Pembayaran",
+  "Diproses",
+  "Dikemas",
+  "Dikirim",
+  "Selesai",
+  "Dibatalkan",
+];
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState([]);
@@ -48,7 +59,7 @@ export default function AdminOrdersPage() {
   const [error, setError] = useState(null);
   const router = useRouter();
 
-  // 1. Cek Autentikasi Admin
+  // 1. Cek Autentikasi Admin (Tidak berubah)
   const checkAdminAuth = useCallback(async () => {
     setLoading(true);
     try {
@@ -71,7 +82,7 @@ export default function AdminOrdersPage() {
     }
   }, [router]); // fetchOrders tidak perlu jadi dependensi di sini
 
-  // 2. Fetch Semua Order
+  // 2. Fetch Semua Order (Tidak berubah)
   const fetchOrders = async () => {
     try {
       const res = await axios.get("http://localhost:4000/admin/orders", {
@@ -86,7 +97,7 @@ export default function AdminOrdersPage() {
     }
   };
 
-  // 3. Handle Perubahan Status
+  // 3. Handle Perubahan Status (Tidak berubah)
   const handleStatusChange = async (orderId, newStatus) => {
     try {
       // Panggil API admin untuk update status
@@ -104,7 +115,11 @@ export default function AdminOrdersPage() {
       );
       showSwalAlert(
         "Berhasil",
-        `Status order #${orderId} diubah menjadi ${newStatus}`,
+        // [MODIFIKASI] Tampilkan status dengan spasi
+        `Status order #${orderId} diubah menjadi ${newStatus.replace(
+          "_",
+          " "
+        )}`,
         "success"
       );
     } catch (err) {
@@ -114,11 +129,12 @@ export default function AdminOrdersPage() {
     }
   };
 
-  // 4. Jalankan Cek Autentikasi saat halaman dimuat
+  // 4. Jalankan Cek Autentikasi saat halaman dimuat (Tidak berubah)
   useEffect(() => {
     checkAdminAuth();
   }, [checkAdminAuth]);
 
+  // Render (Tidak berubah)
   if (loading) {
     return (
       <>
@@ -129,7 +145,6 @@ export default function AdminOrdersPage() {
       </>
     );
   }
-
   if (error) {
     return (
       <>
@@ -150,13 +165,15 @@ export default function AdminOrdersPage() {
         </h1>
 
         <div className="bg-white p-6 rounded-lg shadow-lg overflow-x-auto">
-          <table className="w-full min-w-[700px] text-left text-sm">
+          <table className="w-full min-w-[800px] text-left text-sm">
             <thead>
               <tr className="border-b bg-gray-50">
                 <th className="p-3 font-semibold">Order ID</th>
                 <th className="p-3 font-semibold">Tanggal</th>
                 <th className="p-3 font-semibold">Pelanggan</th>
                 <th className="p-3 font-semibold">Total</th>
+                <th className="p-3 font-semibold">Metode</th>
+                <th className="p-3 font-semibold">Bukti Bayar</th>
                 <th className="p-3 font-semibold">Status</th>
               </tr>
             </thead>
@@ -180,6 +197,23 @@ export default function AdminOrdersPage() {
                   <td className="p-3 font-medium">
                     {formatCurrency(order.total)}
                   </td>
+                  <td className="p-3 text-gray-600">
+                    {order.paymentMethod?.replace("_", " ") || "N/A"}
+                  </td>
+                  <td className="p-3">
+                    {order.paymentProofUrl ? (
+                      <a
+                        href={order.paymentProofUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline text-xs"
+                      >
+                        Lihat Bukti
+                      </a>
+                    ) : (
+                      <span className="text-gray-400 text-xs">N/A</span>
+                    )}
+                  </td>
                   <td className="p-3">
                     {/* Select/Dropdown untuk ubah status */}
                     <select
@@ -191,9 +225,11 @@ export default function AdminOrdersPage() {
                         order.status
                       )}`}
                     >
+                      {/* [MODIFIKASI] Loop allStatuses baru */}
                       {allStatuses.map((status) => (
                         <option key={status} value={status}>
-                          {status}
+                          {status.replace("_", " ")}{" "}
+                          {/* Tampilkan dengan spasi */}
                         </option>
                       ))}
                     </select>
