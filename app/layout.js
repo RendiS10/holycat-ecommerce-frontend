@@ -1,3 +1,5 @@
+// [BARU] Impor 'Script' dari 'next/script'
+import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ToastProvider from "./components/ToastProvider";
@@ -19,8 +21,23 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
+  // [BARU] Ambil Client Key dari environment (jika perlu, atau hardcode untuk sandbox)
+  // Anda harus membuat file .env.local di frontend dan menambahkannya
+  // NEXT_PUBLIC_MIDTRANS_CLIENT_KEY="SB-Mid-client-..."
+  const midtransClientKey =
+    process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY ||
+    "SB-Mid-client-xxxxxxxxxxxxxx"; // Ganti dengan Client Key Anda
+
   return (
     <html lang="en">
+      {/* [BARU] Tambahkan Script Midtrans Snap */}
+      <head>
+        <Script
+          src="https://app.sandbox.midtrans.com/snap/snap.js"
+          data-client-key={midtransClientKey}
+          strategy="beforeInteractive" // Muat sebelum interaksi
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

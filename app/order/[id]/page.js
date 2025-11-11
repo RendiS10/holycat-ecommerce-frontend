@@ -25,7 +25,6 @@ const getStatusStyle = (status) => {
       return "bg-yellow-100 text-yellow-700";
   }
 };
-// Helper lain (tidak berubah)
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -34,6 +33,7 @@ const formatCurrency = (amount) => {
   }).format(amount);
 };
 const formatDate = (dateString) => {
+  if (!dateString) return "N/A"; // Guard clause untuk shippedAt
   const options = {
     year: "numeric",
     month: "long",
@@ -44,113 +44,18 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString("id-ID", options);
 };
 
-// [MODIFIKASI] Komponen baru untuk Upload Bukti Bayar (File)
-function PaymentUploadForm({ orderId, onUploadSuccess }) {
-  const [proofFile, setProofFile] = useState(null); // State untuk file
-  const [isUploading, setIsUploading] = useState(false);
-
-  // Handler saat file dipilih
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file && file.size > 5 * 1024 * 1024) {
-      // Validasi 5MB
-      showSwalAlert(
-        "File Terlalu Besar",
-        "Ukuran file maksimal adalah 5MB.",
-        "error"
-      );
-      e.target.value = null; // Reset input file
-      setProofFile(null);
-      return;
-    }
-    setProofFile(file);
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!proofFile) {
-      showSwalAlert("Error", "Pilih file gambar bukti pembayaran.", "error");
-      return;
-    }
-
-    setIsUploading(true);
-
-    // Buat FormData untuk mengirim file
-    const formData = new FormData();
-    formData.append("proofImage", proofFile); // 'proofImage' harus sama dengan di backend
-
-    try {
-      const res = await axios.put(
-        `http://localhost:4000/orders/${orderId}/submit-proof`,
-        formData, // Kirim formData
-        {
-          headers: {
-            "Content-Type": "multipart/form-data", // Set header
-          },
-          withCredentials: true,
-        }
-      );
-      showSwalAlert("Berhasil", "Bukti pembayaran telah diunggah.", "success");
-      onUploadSuccess(res.data); // Update order state di parent
-    } catch (err) {
-      console.error("Submit proof error:", err);
-      const msg = err?.response?.data?.error || "Gagal mengunggah bukti.";
-      showSwalAlert("Gagal", msg, "error");
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  return (
-    <div className="mt-6 text-center border-t pt-6">
-      <p className="text-sm text-gray-600 mb-3">
-        Silakan lakukan pembayaran dan unggah bukti (Maks 5MB: .jpg, .png,
-        .gif).
-      </p>
-      <form
-        onSubmit={handleSubmit}
-        className="flex flex-col sm:flex-row gap-2 justify-center"
-      >
-        <input
-          type="file"
-          onChange={handleFileChange}
-          disabled={isUploading}
-          className="flex-grow p-2 border rounded-lg text-sm
-                     file:mr-4 file:py-2 file:px-4
-                     file:rounded-full file:border-0
-                     file:text-sm file:font-semibold
-                     file:bg-blue-50 file:text-blue-700
-                     hover:file:bg-blue-100"
-          accept="image/png, image/jpeg, image/jpg, image/gif" // Batasi tipe file
-          required
-        />
-        <button
-          type="submit"
-          disabled={isUploading || !proofFile} // Disable jika tidak ada file
-          className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200 disabled:opacity-50"
-        >
-          {isUploading ? "Mengunggah..." : "Kirim Bukti"}
-        </button>
-      </form>
-      {/* Tampilkan nama file yang dipilih */}
-      {proofFile && (
-        <p className="text-xs text-gray-500 mt-2">File: {proofFile.name}</p>
-      )}
-    </div>
-  );
-}
-
 export default function OrderDetailPage() {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [processingPayment, setProcessingPayment] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [error, setError] = useState(null);
   const params = useParams();
   const router = useRouter();
   const orderId = params.id;
 
+  // ... (Fungsi fetchOrder & useEffect TIDAK BERUBAH) ...
   const fetchOrder = useCallback(async () => {
-    // ... (Fungsi ini tidak berubah) ...
     if (!orderId) return;
     setLoading(true);
     setError(null);
@@ -181,9 +86,71 @@ export default function OrderDetailPage() {
     fetchOrder();
   }, [fetchOrder]);
 
-  // Handler pembatalan (logika dipindah ke backend)
+  // Fungsi untuk memicu Midtrans Snap (Tugas 13.5)
+  const handlePayment = async () => {
+    setProcessingPayment(true);
+    setError(null);
+    try {
+      // 1. Panggil backend kita untuk mendapatkan token Midtrans
+      const res = await axios.post(
+        "http://localhost:4000/payments/create",
+        { orderId: order.id },
+        { withCredentials: true }
+      );
+
+      const snapToken = res.data.token;
+      if (!snapToken) {
+        throw new Error("Gagal mendapatkan token pembayaran");
+      }
+
+      // 2. Panggil window.snap.pay (dari script Midtrans di layout)
+      window.snap.pay(snapToken, {
+        onSuccess: (result) => {
+          console.log("Midtrans onSuccess:", result);
+          showSwalAlert(
+            "Pembayaran Berhasil",
+            "Pembayaran Anda sedang diproses.",
+            "success"
+          );
+          fetchOrder(); // Ambil ulang data order
+        },
+        onPending: (result) => {
+          console.log("Midtrans onPending:", result);
+          showSwalAlert(
+            "Pembayaran Pending",
+            "Selesaikan pembayaran Anda.",
+            "info"
+          );
+          fetchOrder();
+        },
+        onError: (result) => {
+          console.error("Midtrans onError:", result);
+          showSwalAlert(
+            "Pembayaran Gagal",
+            result.message || "Terjadi kesalahan.",
+            "error"
+          );
+        },
+        onClose: () => {
+          console.log("Midtrans popup ditutup");
+          showSwalAlert(
+            "Pembayaran Dibatalkan",
+            "Anda menutup jendela pembayaran sebelum selesai.",
+            "warning"
+          );
+        },
+      });
+    } catch (err) {
+      console.error("Handle payment error:", err);
+      const msg = err?.response?.data?.error || "Gagal memulai pembayaran.";
+      showSwalAlert("Error", msg, "error");
+    } finally {
+      setProcessingPayment(false);
+    }
+  };
+
+  // Fungsi handleCancelOrder (Tidak berubah)
   const handleCancelOrder = async () => {
-    // ... (Fungsi ini tidak berubah) ...
     const result = await Swal.fire({
       title: "Batalkan Pesanan?",
       text: "Anda yakin ingin membatalkan pesanan ini? Stok akan dikembalikan.",
@@ -219,40 +186,30 @@ export default function OrderDetailPage() {
     }
   };
 
-  // Handler untuk sukses upload bukti bayar
-  const onUploadSuccess = (updatedOrder) => {
-    setOrder(updatedOrder);
-  };
-
   // Render Loading / Error (Tidak berubah)
   if (loading) {
     return (
       <>
-        {" "}
-        <Header />{" "}
+        <Header />
         <div className="p-6 pt-[140px] max-w-2xl mx-auto text-center">
-          {" "}
-          Loading Order Details...{" "}
-        </div>{" "}
+          Loading Order Details...
+        </div>
       </>
     );
   }
   if (error && !order) {
     return (
       <>
-        {" "}
-        <Header />{" "}
+        <Header />
         <div className="p-6 pt-[140px] max-w-2xl mx-auto text-center">
-          {" "}
-          <p className="text-red-600 text-xl">{error}</p>{" "}
+          <p className="text-red-600 text-xl">{error}</p>
           <Link
             href="/"
             className="text-blue-600 hover:underline mt-4 inline-block"
           >
-            {" "}
-            Kembali ke Beranda{" "}
-          </Link>{" "}
-        </div>{" "}
+            Kembali ke Beranda
+          </Link>
+        </div>
       </>
     );
   }
@@ -263,11 +220,13 @@ export default function OrderDetailPage() {
   // Tampilkan Detail Order
   const statusStyle = getStatusStyle(order.status);
 
+  // Logika kapan tombol Batal muncul (Tidak berubah)
   const canCancel =
     (order.paymentMethod !== "COD" && order.status === "Menunggu_Pembayaran") ||
     (order.paymentMethod === "COD" && order.status === "Diproses");
 
-  const showUploadForm =
+  // Logika kapan tombol Bayar Sekarang muncul (Tidak berubah)
+  const showPaymentButton =
     order.paymentMethod !== "COD" && order.status === "Menunggu_Pembayaran";
 
   return (
@@ -282,7 +241,7 @@ export default function OrderDetailPage() {
         </p>
 
         <div className="bg-white p-6 rounded-lg shadow space-y-6">
-          {/* Status & Metode Pembayaran */}
+          {/* Status & Metode Pembayaran (Tidak berubah) */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h2 className="text-lg font-semibold text-[#44af7c]">
@@ -291,8 +250,7 @@ export default function OrderDetailPage() {
               <span
                 className={`px-3 py-1 text-sm font-medium rounded-full ${statusStyle}`}
               >
-                {order.status.replace("_", " ")}{" "}
-                {/* Ganti underscore dgn spasi */}
+                {order.status.replace("_", " ")}
               </span>
             </div>
             <div>
@@ -305,7 +263,7 @@ export default function OrderDetailPage() {
             </div>
           </div>
 
-          {/* [BARU] Tampilkan Bukti Bayar jika sudah diunggah */}
+          {/* Tampilkan Bukti Bayar (Tidak berubah) */}
           {order.paymentProofUrl && (
             <div>
               <h2 className="text-lg font-semibold text-[#44af7c]">
@@ -317,7 +275,6 @@ export default function OrderDetailPage() {
                 rel="noopener noreferrer"
                 className="text-sm text-blue-600 hover:underline break-all"
               >
-                {/* Tampilkan link yang bisa diklik */}
                 Lihat Bukti Pembayaran (Klik)
               </a>
             </div>
@@ -341,6 +298,30 @@ export default function OrderDetailPage() {
               )}
             </div>
           </div>
+
+          {/* --- [BARU] Info Pengiriman (Tugas 14.5) --- */}
+          {(order.status === "Dikirim" || order.status === "Selesai") &&
+            order.trackingNumber && (
+              <div>
+                <h2 className="text-lg font-semibold mb-2 text-[#44af7c]">
+                  Info Pengiriman
+                </h2>
+                <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded border space-y-1">
+                  <p>
+                    <span className="font-medium">Kurir:</span> {order.courier}
+                  </p>
+                  <p>
+                    <span className="font-medium">No. Resi:</span>{" "}
+                    {order.trackingNumber}
+                  </p>
+                  <p>
+                    <span className="font-medium">Dikirim Pada:</span>{" "}
+                    {formatDate(order.shippedAt)}
+                  </p>
+                </div>
+              </div>
+            )}
+          {/* --- Batas Kode Baru --- */}
 
           {/* Daftar Item (Tidak berubah) */}
           <div>
@@ -385,26 +366,30 @@ export default function OrderDetailPage() {
             </p>
           </div>
 
-          {/* [MODIFIKASI] Area Aksi Dinamis */}
-
-          {/* 1. Tampilkan Form Upload jika Menunggu Pembayaran (Non-COD) & Belum Upload */}
-          {showUploadForm && !order.paymentProofUrl && (
-            <PaymentUploadForm
-              orderId={order.id}
-              onUploadSuccess={onUploadSuccess}
-            />
+          {/* Area Aksi Dinamis (Tidak berubah) */}
+          {showPaymentButton && (
+            <div className="mt-6 text-center border-t pt-6">
+              <p className="text-sm text-gray-600 mb-3">
+                Selesaikan pembayaran Anda melalui Midtrans.
+              </p>
+              <button
+                onClick={handlePayment}
+                disabled={processingPayment || cancelling}
+                className="bg-blue-600 text-white font-semibold py-2 px-5 rounded-lg hover:bg-blue-700 transition duration-200 disabled:opacity-50"
+              >
+                {processingPayment ? "Memuat..." : "Bayar Sekarang"}
+              </button>
+            </div>
           )}
-
-          {/* 2. Tampilkan tombol Batal jika diizinkan */}
           {canCancel && (
             <div
               className={`mt-6 text-center ${
-                !showUploadForm ? "border-t pt-6" : "pt-4"
+                !showPaymentButton ? "border-t pt-6" : "pt-4"
               }`}
             >
               <button
                 onClick={handleCancelOrder}
-                disabled={cancelling}
+                disabled={cancelling || processingPayment}
                 className="bg-red-600 text-white font-semibold py-2 px-5 rounded-lg hover:bg-red-700 transition duration-200 disabled:opacity-50"
               >
                 {cancelling ? "Membatalkan..." : "Batalkan Pesanan"}
@@ -412,12 +397,10 @@ export default function OrderDetailPage() {
             </div>
           )}
 
-          {/* Tampilkan error jika ada (dari pembatalan) */}
+          {/* Error & Tombol kembali (Tidak berubah) */}
           {error && (
             <p className="text-red-500 text-sm mt-2 text-center">{error}</p>
           )}
-
-          {/* Tombol kembali (Tidak berubah) */}
           <div className="mt-6 text-center">
             <Link
               href="/orders"
