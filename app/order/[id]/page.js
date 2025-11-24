@@ -44,6 +44,102 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString("id-ID", options);
 };
 
+// [MODIFIKASI] Komponen baru untuk Upload Bukti Bayar (File)
+function PaymentUploadForm({ orderId, onUploadSuccess }) {
+  const [proofFile, setProofFile] = useState(null); // State untuk file
+  const [isUploading, setIsUploading] = useState(false);
+
+  // Handler saat file dipilih
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.size > 5 * 1024 * 1024) {
+      // Validasi 5MB
+      showSwalAlert(
+        "File Terlalu Besar",
+        "Ukuran file maksimal adalah 5MB.",
+        "error"
+      );
+      e.target.value = null; // Reset input file
+      setProofFile(null);
+      return;
+    }
+    setProofFile(file);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!proofFile) {
+      showSwalAlert("Error", "Pilih file gambar bukti pembayaran.", "error");
+      return;
+    }
+
+    setIsUploading(true);
+
+    // Buat FormData untuk mengirim file
+    const formData = new FormData();
+    formData.append("proofImage", proofFile); // 'proofImage' harus sama dengan di backend
+
+    try {
+      const res = await axios.put(
+        `http://localhost:4000/orders/${orderId}/submit-proof`,
+        formData, // Kirim formData
+        {
+          headers: {
+            "Content-Type": "multipart/form-data", // Set header
+          },
+          withCredentials: true,
+        }
+      );
+      showSwalAlert("Berhasil", "Bukti pembayaran telah diunggah.", "success");
+      onUploadSuccess(res.data); // Update order state di parent
+    } catch (err) {
+      console.error("Submit proof error:", err);
+      const msg = err?.response?.data?.error || "Gagal mengunggah bukti.";
+      showSwalAlert("Gagal", msg, "error");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  return (
+    <div className="mt-6 text-center border-t pt-6">
+      <p className="text-sm text-gray-600 mb-3">
+        Silakan lakukan pembayaran dan unggah bukti (Maks 5MB: .jpg, .png,
+        .gif).
+      </p>
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col sm:flex-row gap-2 justify-center"
+      >
+        <input
+          type="file"
+          onChange={handleFileChange}
+          disabled={isUploading}
+          className="flex-grow p-2 border rounded-lg text-sm
+                     file:mr-4 file:py-2 file:px-4
+                     file:rounded-full file:border-0
+                     file:text-sm file:font-semibold
+                     file:bg-blue-50 file:text-blue-700
+                     hover:file:bg-blue-100"
+          accept="image/png, image/jpeg, image/jpg, image/gif" // Batasi tipe file
+          required
+        />
+        <button
+          type="submit"
+          disabled={isUploading || !proofFile} // Disable jika tidak ada file
+          className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200 disabled:opacity-50"
+        >
+          {isUploading ? "Mengunggah..." : "Kirim Bukti"}
+        </button>
+      </form>
+      {/* Tampilkan nama file yang dipilih */}
+      {proofFile && (
+        <p className="text-xs text-gray-500 mt-2">File: {proofFile.name}</p>
+      )}
+    </div>
+  );
+}
+
 export default function OrderDetailPage() {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -186,30 +282,40 @@ export default function OrderDetailPage() {
     }
   };
 
+  // [MODIFIKASI] Handler untuk sukses upload bukti bayar
+  const onUploadSuccess = (updatedOrder) => {
+    setOrder(updatedOrder);
+  };
+
   // Render Loading / Error (Tidak berubah)
   if (loading) {
     return (
       <>
-        <Header />
+        {" "}
+        <Header />{" "}
         <div className="p-6 pt-[140px] max-w-2xl mx-auto text-center">
-          Loading Order Details...
-        </div>
+          {" "}
+          Loading Order Details...{" "}
+        </div>{" "}
       </>
     );
   }
   if (error && !order) {
     return (
       <>
-        <Header />
+        {" "}
+        <Header />{" "}
         <div className="p-6 pt-[140px] max-w-2xl mx-auto text-center">
-          <p className="text-red-600 text-xl">{error}</p>
+          {" "}
+          <p className="text-red-600 text-xl">{error}</p>{" "}
           <Link
             href="/"
             className="text-blue-600 hover:underline mt-4 inline-block"
           >
-            Kembali ke Beranda
+            {" "}
+            Kembali ke Beranda{" "}
           </Link>
-        </div>
+        </div>{" "}
       </>
     );
   }
@@ -225,9 +331,15 @@ export default function OrderDetailPage() {
     (order.paymentMethod !== "COD" && order.status === "Menunggu_Pembayaran") ||
     (order.paymentMethod === "COD" && order.status === "Diproses");
 
-  // Logika kapan tombol Bayar Sekarang muncul (Tidak berubah)
+  // [MODIFIKASI] Logika kapan tombol Bayar Sekarang (Midtrans) muncul
   const showPaymentButton =
-    order.paymentMethod !== "COD" && order.status === "Menunggu_Pembayaran";
+    order.paymentMethod !== "COD" && // Bukan COD
+    order.status === "Menunggu_Pembayaran"; // dan Menunggu Pembayaran
+
+  // [MODIFIKASI] Logika kapan form Upload Bukti Manual muncul
+  const showUploadForm =
+    order.paymentMethod === "BANK_TRANSFER" && // HANYA untuk Bank Transfer
+    order.status === "Menunggu_Pembayaran"; // dan Menunggu Pembayaran
 
   return (
     <>
@@ -366,7 +478,9 @@ export default function OrderDetailPage() {
             </p>
           </div>
 
-          {/* Area Aksi Dinamis (Tidak berubah) */}
+          {/* [MODIFIKASI] Area Aksi Dinamis */}
+
+          {/* 1. Tampilkan Tombol Bayar Midtrans */}
           {showPaymentButton && (
             <div className="mt-6 text-center border-t pt-6">
               <p className="text-sm text-gray-600 mb-3">
@@ -381,10 +495,23 @@ export default function OrderDetailPage() {
               </button>
             </div>
           )}
+
+          {/* 2. Tampilkan Form Upload jika BANK_TRANSFER & belum bayar & belum upload */}
+          {/* Logika ini sekarang digantikan oleh Midtrans, tapi bisa diaktifkan jika diperlukan */}
+          {/*
+          {showUploadForm && !order.paymentProofUrl && (
+             <PaymentUploadForm 
+                orderId={order.id} 
+                onUploadSuccess={onUploadSuccess} 
+             />
+          )}
+          */}
+
+          {/* 3. Tampilkan tombol Batal jika diizinkan */}
           {canCancel && (
             <div
               className={`mt-6 text-center ${
-                !showPaymentButton ? "border-t pt-6" : "pt-4"
+                !showPaymentButton ? "border-t pt-6" : "pt-4" // Sesuaikan padding jika tombol bayar tidak ada
               }`}
             >
               <button

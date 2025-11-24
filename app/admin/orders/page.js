@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Header from "../../components/Header";
 import { showSwalAlert } from "../../lib/swalHelper";
 import Link from "next/link";
+import Swal from "sweetalert2"; // <-- Impor Swal
 
 // [MODIFIKASI] Helper untuk style status (sesuai Enum baru)
 const getStatusStyle = (status) => {
@@ -33,6 +34,7 @@ const formatCurrency = (amount) => {
   }).format(amount);
 };
 const formatDate = (dateString) => {
+  if (!dateString) return "N/A"; // Guard clause untuk shippedAt yang mungkin null
   const options = {
     year: "numeric",
     month: "short",
@@ -69,7 +71,6 @@ export default function AdminOrdersPage() {
       if (res.data.role !== "ADMIN") {
         throw new Error("Akses ditolak");
       }
-      // Jika admin, fetch order
       await fetchOrders();
     } catch (err) {
       console.error("Auth check error:", err);
@@ -80,7 +81,7 @@ export default function AdminOrdersPage() {
       );
       router.push("/login?redirect=/admin/orders");
     }
-  }, [router]); // fetchOrders tidak perlu jadi dependensi di sini
+  }, [router]);
 
   // 2. Fetch Semua Order (Tidak berubah)
   const fetchOrders = async () => {
@@ -97,25 +98,67 @@ export default function AdminOrdersPage() {
     }
   };
 
-  // 3. Handle Perubahan Status (Tidak berubah)
+  useEffect(() => {
+    checkAdminAuth();
+  }, [checkAdminAuth]);
+
+  // 3. [MODIFIKASI] Handle Perubahan Status (Tugas 14.4)
   const handleStatusChange = async (orderId, newStatus) => {
+    let payload = { status: newStatus };
+
+    // [LOGIKA BARU] Jika status adalah "Dikirim", minta info tambahan
+    if (newStatus === "Dikirim") {
+      const { value: formValues } = await Swal.fire({
+        title: "Masukkan Detail Pengiriman",
+        html:
+          '<input id="swal-input-courier" class="swal2-input" placeholder="Nama Kurir (cth: JNE)">' +
+          '<input id="swal-input-tracking" class="swal2-input" placeholder="Nomor Resi">',
+        focusConfirm: false,
+        showCancelButton: true,
+        confirmButtonText: "Simpan & Kirim",
+        cancelButtonText: "Batal",
+        preConfirm: () => {
+          const courier = document.getElementById("swal-input-courier").value;
+          const trackingNumber = document.getElementById(
+            "swal-input-tracking"
+          ).value;
+          if (!courier || !trackingNumber) {
+            Swal.showValidationMessage(
+              "Kurir dan Nomor Resi tidak boleh kosong"
+            );
+            return false;
+          }
+          return { courier: courier, trackingNumber: trackingNumber };
+        },
+      });
+
+      // Jika pengguna mengklik "Batal"
+      if (!formValues) {
+        // Reset dropdown ke nilai semula
+        setOrders((prevOrders) => [...prevOrders]); // Memaksa re-render untuk reset select
+        return;
+      }
+
+      payload.courier = formValues.courier;
+      payload.trackingNumber = formValues.trackingNumber;
+    }
+
+    // Lanjutkan memanggil API
     try {
-      // Panggil API admin untuk update status
       const res = await axios.put(
         `http://localhost:4000/admin/orders/${orderId}/status`,
-        { status: newStatus },
+        payload, // Kirim payload yang sudah lengkap
         { withCredentials: true }
       );
 
       // Update state orders secara lokal
       setOrders((prevOrders) =>
-        prevOrders.map((order) =>
-          order.id === orderId ? { ...order, status: res.data.status } : order
+        prevOrders.map(
+          (order) => (order.id === orderId ? res.data : order) // Ganti order lama dengan data baru
         )
       );
       showSwalAlert(
         "Berhasil",
-        // [MODIFIKASI] Tampilkan status dengan spasi
         `Status order #${orderId} diubah menjadi ${newStatus.replace(
           "_",
           " "
@@ -126,32 +169,34 @@ export default function AdminOrdersPage() {
       console.error("Update status error:", err);
       const msg = err?.response?.data?.error || "Gagal memperbarui status.";
       showSwalAlert("Gagal", msg, "error");
+      // Tidak perlu fetchOrders() di sini, state lokal akan otomatis reset
+      // ke nilai lama jika `setOrders` tidak dipanggil
+      setOrders((prevOrders) => [...prevOrders]); // Paksa re-render
     }
   };
-
-  // 4. Jalankan Cek Autentikasi saat halaman dimuat (Tidak berubah)
-  useEffect(() => {
-    checkAdminAuth();
-  }, [checkAdminAuth]);
 
   // Render (Tidak berubah)
   if (loading) {
     return (
       <>
-        <Header />
+        {" "}
+        <Header />{" "}
         <div className="p-6 pt-[140px] max-w-6xl mx-auto text-center">
-          Loading Admin Dashboard...
-        </div>
+          {" "}
+          Loading Admin Dashboard...{" "}
+        </div>{" "}
       </>
     );
   }
   if (error) {
     return (
       <>
-        <Header />
+        {" "}
+        <Header />{" "}
         <div className="p-6 pt-[140px] max-w-6xl mx-auto text-center">
-          <p className="text-red-600 text-xl">{error}</p>
-        </div>
+          {" "}
+          <p className="text-red-600 text-xl">{error}</p>{" "}
+        </div>{" "}
       </>
     );
   }
@@ -165,7 +210,7 @@ export default function AdminOrdersPage() {
         </h1>
 
         <div className="bg-white p-6 rounded-lg shadow-lg overflow-x-auto">
-          <table className="w-full min-w-[800px] text-left text-sm">
+          <table className="w-full min-w-[900px] text-left text-sm">
             <thead>
               <tr className="border-b bg-gray-50">
                 <th className="p-3 font-semibold">Order ID</th>
@@ -174,6 +219,8 @@ export default function AdminOrdersPage() {
                 <th className="p-3 font-semibold">Total</th>
                 <th className="p-3 font-semibold">Metode</th>
                 <th className="p-3 font-semibold">Bukti Bayar</th>
+                <th className="p-3 font-semibold">Info Resi</th>{" "}
+                {/* KOLOM BARU */}
                 <th className="p-3 font-semibold">Status</th>
               </tr>
             </thead>
@@ -214,8 +261,20 @@ export default function AdminOrdersPage() {
                       <span className="text-gray-400 text-xs">N/A</span>
                     )}
                   </td>
+                  {/* [BARU] Tampilkan Info Resi */}
+                  <td className="p-3 text-xs">
+                    {order.trackingNumber ? (
+                      <div className="font-medium">
+                        {order.courier}:{" "}
+                        <span className="text-gray-700">
+                          {order.trackingNumber}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-gray-400">Belum ada</span>
+                    )}
+                  </td>
                   <td className="p-3">
-                    {/* Select/Dropdown untuk ubah status */}
                     <select
                       value={order.status}
                       onChange={(e) =>
@@ -225,11 +284,9 @@ export default function AdminOrdersPage() {
                         order.status
                       )}`}
                     >
-                      {/* [MODIFIKASI] Loop allStatuses baru */}
                       {allStatuses.map((status) => (
                         <option key={status} value={status}>
-                          {status.replace("_", " ")}{" "}
-                          {/* Tampilkan dengan spasi */}
+                          {status.replace("_", " ")}
                         </option>
                       ))}
                     </select>
