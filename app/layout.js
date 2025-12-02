@@ -35,7 +35,7 @@ export default function RootLayout({ children }) {
         <Script
           src="https://app.sandbox.midtrans.com/snap/snap.js"
           data-client-key={midtransClientKey}
-          strategy="beforeInteractive" // Muat sebelum interaksi
+          strategy="lazyOnload"
         />
       </head>
       <body
