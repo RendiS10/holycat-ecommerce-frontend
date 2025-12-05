@@ -1,11 +1,11 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation"; // Tambah useSearchParams
 import axios from "axios";
-import { showLogoutConfirm, showSwalAlert } from "../lib/swalHelper"; // <-- Import SwalAlert Helper
+import { showLogoutConfirm, showSwalAlert } from "../lib/swalHelper";
 
-// --- Konstanta Warna Tailwind (Arbitrary Values) ---
+// ... (Konstanta Warna TETAP SAMA) ...
 const COLORS = {
   GREEN: "#44af7c",
   YELLOW: "#ffbf00",
@@ -25,14 +25,46 @@ export default function Header() {
   const [count, setCount] = useState(0);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
 
-  // State untuk mengontrol menu dropdown
+  // [BARU] State untuk pencarian
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // State untuk mengontrol menu dropdown (TETAP SAMA)
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const [isSearchMobileOpen, setIsSearchMobileOpen] = useState(false);
   const [isCategoryMobileOpen, setIsCategoryMobileOpen] = useState(false);
 
   const router = useRouter();
+  const searchParams = useSearchParams(); // Untuk membaca URL saat ini
 
-  // --- FUNGSI ASINKRONUS (Data Fetching) ---
+  // [BARU] Sinkronkan input dengan URL (jika user me-refresh halaman pencarian)
+  useEffect(() => {
+    const currentSearch = searchParams.get("search");
+    if (currentSearch) {
+      setSearchTerm(currentSearch);
+    }
+  }, [searchParams]);
+
+  // [BARU] Fungsi Handle Search
+  const handleSearch = (e) => {
+    e.preventDefault(); // Mencegah reload form default
+    if (searchTerm.trim()) {
+      // Redirect ke halaman produk dengan query param
+      router.push(`/products?search=${encodeURIComponent(searchTerm)}`);
+      setIsSearchMobileOpen(false); // Tutup search mobile jika terbuka
+    } else {
+      // Jika kosong, ke halaman produk semua
+      router.push("/products");
+    }
+  };
+
+  // [BARU] Handle Enter Key
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleSearch(e);
+    }
+  };
+
+  // ... (Fungsi fetchCount, checkAuth, handleLogout, toggleMenu TETAP SAMA) ...
   const fetchCount = async () => {
     try {
       const res = await axios.get("http://localhost:4000/cart", {
@@ -59,10 +91,8 @@ export default function Header() {
     }
   }, []);
 
-  // FUNGSI UTAMA LOGOUT (DIPANGGIL JIKA KONFIRMASI DITERIMA)
   const handleLogout = async () => {
     if (typeof window === "undefined") return;
-
     try {
       await axios.post(
         "http://localhost:4000/auth/logout",
@@ -70,37 +100,25 @@ export default function Header() {
         { withCredentials: true }
       );
     } catch (err) {
-      console.error("Logout API failed, continuing local cleanup:", err);
+      console.error("Logout failed", err);
     }
-
     setCount(0);
     setUser(null);
     setIsAccountOpen(false);
-
     try {
       sessionStorage.removeItem("dev_token");
       delete axios.defaults.headers.common["Authorization"];
     } catch (e) {}
-
     window.dispatchEvent(new Event("cartUpdated"));
     window.dispatchEvent(new Event("authChanged"));
-
-    // Tampilkan notifikasi SWALALERT SUKSES LOGOUT
-    showSwalAlert(
-      "Berhasil Keluar",
-      "Anda telah berhasil keluar dari akun.",
-      "info"
-    );
-
+    showSwalAlert("Berhasil Keluar", "Anda telah keluar.", "info");
     router.push("/");
   };
 
-  // FUNGSI YANG DIPANGGIL TOMBOL: Menampilkan modal konfirmasi
   const logout = () => {
     showLogoutConfirm(handleLogout);
   };
 
-  // --- FUNGSI TOGGLE MENU (Client Side) ---
   const toggleAccountMenu = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -115,7 +133,6 @@ export default function Header() {
     setIsSearchMobileOpen((s) => !s);
     setIsAccountOpen(false);
     setIsCategoryMobileOpen(false);
-
     if (!isSearchMobileOpen) {
       setTimeout(() => {
         document.getElementById("mobile-search-input")?.focus();
@@ -129,7 +146,6 @@ export default function Header() {
     setIsSearchMobileOpen(false);
   };
 
-  // Menutup menu jika klik di luar komponen
   useEffect(() => {
     const clickOutsideHandler = (event) => {
       const headerElement = document.querySelector(".custom-navbar");
@@ -140,17 +156,12 @@ export default function Header() {
       }
     };
     document.addEventListener("click", clickOutsideHandler);
-
-    // --- EFFECT LISTENER ---
     checkAuth();
     fetchCount();
-
     const authHandler = () => checkAuth();
     const cartHandler = () => fetchCount();
-
     window.addEventListener("authChanged", authHandler);
     window.addEventListener("cartUpdated", cartHandler);
-
     return () => {
       document.removeEventListener("click", clickOutsideHandler);
       window.removeEventListener("authChanged", authHandler);
@@ -158,46 +169,45 @@ export default function Header() {
     };
   }, [checkAuth]);
 
-  // isAuth dihitung dari keberadaan objek user
   const isAuth = !!user;
   const userName = user?.name || "Cat Lover";
   const userEmail = user?.email || "user@holycat.com";
 
   return (
-    <header className="custom-navbar fixed top-0 left-0 right-0 z-[1000] shadow-md">
-      {/* MOBILE SEARCH BAR DROPDOWN (Hanya tampil di mobile jika diklik) */}
+    <header className="custom-navbar fixed top-0 left-0 right-0 z-[1000] shadow-md bg-white">
+      {/* MOBILE SEARCH BAR (Updated) */}
       <div
         id="mobile-search-bar"
-        className={`mobile-search-bar absolute top-full left-0 right-0 p-3 bg-[${
-          COLORS.DARK_BG
-        }] z-[500] shadow-lg md:hidden ${
+        className={`mobile-search-bar absolute top-full left-0 right-0 p-3 bg-white z-[500] shadow-lg md:hidden ${
           isSearchMobileOpen ? "block" : "hidden"
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-        <input
-          type="text"
-          id="mobile-search-input"
-          className={`mobile-search-input w-full p-2 rounded-lg border-2 border-[#44af7c] text-lg font-bold bg-[#4b5563] text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#ffbf00]`}
-          placeholder="Cari vitamin, grooming, atau obat kucing..."
-          onBlur={() => setIsSearchMobileOpen(false)}
-        />
+        <div className="flex gap-2">
+          <input
+            type="text"
+            id="mobile-search-input"
+            value={searchTerm} // Bind value
+            onChange={(e) => setSearchTerm(e.target.value)} // Handle change
+            onKeyDown={handleKeyDown} // Handle Enter
+            className={`mobile-search-input w-full p-2 rounded-lg border-2 border-[#44af7c] text-lg font-bold bg-white text-[#2b2b2b] placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#ffbf00]`}
+            placeholder="Cari produk..."
+          />
+          <button
+            onClick={handleSearch}
+            className="bg-[#44af7c] text-white px-4 rounded-lg"
+          >
+            <i className="fas fa-search"></i>
+          </button>
+        </div>
       </div>
 
-      {/* ------------------------------------------------------------------ */}
-      {/* BARIS ATAS (LOGO, SEARCH DESKTOP, CART, AUTH) - Warna Gelap */}
-      {/* ------------------------------------------------------------------ */}
       <div
-        // Mengubah h-[70px] menjadi h-16 (64px) atau h-18 (72px) agar lebih standar,
-        // tapi h-[70px] tetap dipertahankan jika Anda memang ingin 70px.
-        // Fokus: memastikan `items-center` aktif untuk sejajar vertikal.
-        className={`nav-top bg-[${COLORS.DARK_BG}] h-[70px] px-4 md:px-10 flex items-center justify-between relative`}
+        className={`nav-top bg-white h-[70px] px-4 md:px-10 flex items-center justify-between relative`}
       >
         <div className="nav-group-left flex items-center gap-5">
-          {/* Logo HolycatStore */}
           <Link
             href="/"
-            // Hapus pt-[5px] di sini
             className={`logo-flowbite flex items-center font-['Lilita_One'] text-[30px] md:text-[30px] ${COLOR_PRIMARY_GREEN_CLASS}`}
           >
             <img
@@ -207,15 +217,18 @@ export default function Header() {
             />
           </Link>
 
-          {/* Search Bar Desktop */}
-          <div className="search-container hidden lg:flex rounded-lg overflow-hidden w-[500px] border-2 border-[#44af7c] shadow-inner shadow-black/50">
+          {/* Search Bar Desktop (Updated) */}
+          <div className="search-container hidden lg:flex rounded-lg overflow-hidden w-[500px] border-2 border-[#44af7c] shadow-inner">
             <input
               type="text"
-              // Pastikan input memiliki tinggi yang seragam dengan tombol dan elemen lain
-              className="search-input flex-grow p-[8px] border-none text-[18px] font-bold bg-white text-[#4b5563] placeholder-gray-400 focus:outline-none"
+              value={searchTerm} // Bind value
+              onChange={(e) => setSearchTerm(e.target.value)} // Handle change
+              onKeyDown={handleKeyDown} // Handle Enter
+              className="search-input flex-grow p-[8px] border-none text-[18px] font-bold bg-white text-[#2b2b2b] placeholder-gray-400 focus:outline-none"
               placeholder="Apa yang bisa kami bantu hari ini?"
             />
             <button
+              onClick={handleSearch} // Handle Click
               className={`search-button bg-[#44af7c] text-white px-[15px] text-[20px]  hover:text-[#ffbf00] cursor-pointer`}
             >
               <i className="fas fa-search"></i>
@@ -223,9 +236,8 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Group Kanan: Search Mobile, Cart, Auth */}
-        <div className="nav-group-right flex items-center gap-7 text-white">
-          {/* Search Icon Mobile */}
+        {/* Group Kanan (Cart & Auth - TETAP SAMA) */}
+        <div className="nav-group-right flex items-center gap-7 text-[#2b2b2b]">
           <a
             href="#"
             className={`nav-icon-link search-icon-link lg:hidden text-2xl ${COLOR_PRIMARY_GREEN_CLASS}`}
@@ -233,15 +245,14 @@ export default function Header() {
           >
             <i className="fas fa-search text-2xl"></i>
           </a>
-
-          {/* Cart Link */}
           <Link
             href="/cart"
-            // Penting: Hapus pt-[5px] di sini untuk menyejajarkan
             className={`nav-icon-link relative flex items-center text-[24px] font-bold ${COLOR_PRIMARY_GREEN_CLASS} hover:text-[#ffbf00]`}
           >
             <i className="fas fa-shopping-cart text-2xl"></i>
-            <span className="hidden md:inline ml-2">Keranjang</span>
+            <span className="hidden md:inline ml-2 text-[#2b2b2b]">
+              Keranjang
+            </span>
             {count > 0 && (
               <span
                 className={`absolute top-[-5px] right-[-10px] bg-[#ef4444] text-white rounded-full px-[7px] text-[14px] font-['Lilita_One'] leading-none flex items-center justify-center`}
@@ -251,11 +262,9 @@ export default function Header() {
             )}
           </Link>
 
-          {/* AKUN / LOGIN BUTTONS */}
           {isLoadingAuth ? (
-            <div className="w-20 h-8 bg-gray-600 rounded animate-pulse"></div>
+            <div className="w-20 h-8 bg-gray-200 rounded animate-pulse"></div>
           ) : !isAuth ? (
-            // Bagian ini seharusnya sudah sejajar karena elemennya inline.
             <div className="flex items-center gap-4 text-[24px] font-bold">
               <Link
                 href="/login"
@@ -265,7 +274,7 @@ export default function Header() {
               </Link>
               <Link
                 href="/register"
-                className={` text-[#44af7c] px-3 py-1 rounded-[30px] hover:text-[#ffbf00] transition-colors text-[24px] font-bold`}
+                className={`text-[#44af7c] px-3 py-1 rounded-[30px] hover:text-[#ffbf00] transition-colors text-[24px] font-bold`}
               >
                 Daftar
               </Link>
@@ -281,46 +290,37 @@ export default function Header() {
               <a
                 href="#"
                 onClick={toggleAccountMenu}
-                // Penting: Hapus pt-[5px] di sini untuk menyejajarkan
                 className={`nav-icon-link my-account flex items-center text-[24px] font-bold cursor-pointer ${COLOR_PRIMARY_GREEN_CLASS}`}
               >
-                {/* Placeholder Avatar */}
                 <img
                   src="/next.svg"
-                  alt="User Avatar"
-                  className="w-[30px] h-[30px] rounded-full mr-[5px] object-cover brightness-125"
+                  alt="Avatar"
+                  className="w-[30px] h-[30px] rounded-full mr-[5px] object-cover brightness-100"
                 />
-                <span className="hidden md:inline font-bold">Akun Saya</span>
-                <i className="fas fa-caret-down ml-1 text-sm"></i>
+                <span className="hidden md:inline font-bold text-[#2b2b2b]">
+                  Akun Saya
+                </span>
+                <i className="fas fa-caret-down ml-1 text-sm text-[#2b2b2b]"></i>
               </a>
-
-              {/* Dropdown Menu (Account) ... (Tidak diubah) */}
               <div
-                className={`absolute top-full right-0 mt-2 w-[250px] bg-[#f3f4f6] rounded-lg shadow-xl p-0 z-[100] ${
+                className={`absolute top-full right-0 mt-2 w-[250px] bg-white rounded-lg shadow-xl border border-gray-100 p-0 z-[100] ${
                   isAccountOpen ? "block" : "hidden"
                 }`}
               >
-                <div className="dropdown-header text-center p-[15px] border-b border-gray-700">
-                  <img
-                    src="/next.svg"
-                    alt="User Avatar"
-                    className="w-12 h-12 rounded-full mx-auto mb-[5px] brightness-125"
-                  />
+                <div className="dropdown-header text-center p-[15px] border-b border-gray-200">
                   <h4 className="text-[26px] font-extrabold text-[#2B2B2B] m-0 leading-none">
                     Halo, {userName.split(" ")[0]}
                   </h4>
-                  <p className="text-[18px] text-[#2B2B2B] m-0 leading-none">
+                  <p className="text-[18px] text-gray-500 m-0 leading-none">
                     {userEmail}
                   </p>
                 </div>
-
                 <ul className="dropdown-menu-list list-none p-[10px] m-0 text-[22px] font-bold">
-                  {/* ==> TAMBAHKAN KODE INI DI SINI <== */}
                   {user?.role === "ADMIN" && (
                     <li>
                       <Link
                         href="/admin/orders"
-                        className="flex items-center p-2 text-[#2B2B2B] bg-yellow-100 hover:bg-yellow-200"
+                        className="flex items-center p-2 text-[#2B2B2B] bg-yellow-100 hover:bg-yellow-200 rounded-md mb-1"
                       >
                         <i
                           className={`fas fa-shield-halved ${COLOR_PRIMARY_GREEN_CLASS} mr-3 text-xl`}
@@ -329,11 +329,10 @@ export default function Header() {
                       </Link>
                     </li>
                   )}
-                  {/* ==> BATAS TAMBAHAN KODE <== */}
                   <li>
                     <Link
                       href="/profile"
-                      className="flex items-center p-2 text-[#2B2B2B] hover:bg-[#374151]"
+                      className="flex items-center p-2 text-[#2B2B2B] hover:bg-gray-100 rounded-md"
                     >
                       <i
                         className={`fas fa-user-circle ${COLOR_PRIMARY_GREEN_CLASS} mr-3 text-xl`}
@@ -343,19 +342,8 @@ export default function Header() {
                   </li>
                   <li>
                     <Link
-                      href="#"
-                      className="flex items-center p-2 text-[#2B2B2B] hover:bg-[#374151]"
-                    >
-                      <i
-                        className={`fas fa-wallet ${COLOR_PRIMARY_GREEN_CLASS} mr-3 text-xl`}
-                      ></i>{" "}
-                      Dompet Saya
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="http://localhost:3000/orders"
-                      className="flex items-center p-2 text-[#2B2B2B] hover:bg-[#374151]"
+                      href="/orders"
+                      className="flex items-center p-2 text-[#2B2B2B] hover:bg-gray-100 rounded-md"
                     >
                       <i
                         className={`fas fa-truck-moving ${COLOR_PRIMARY_GREEN_CLASS} mr-3 text-xl`}
@@ -363,44 +351,10 @@ export default function Header() {
                       Pesanan Saya
                     </Link>
                   </li>
-                  <li>
-                    <Link
-                      href="#"
-                      className="flex items-center p-2 text-[#2B2B2B] hover:bg-[#374151]"
-                    >
-                      <i
-                        className={`fas fa-home ${COLOR_PRIMARY_GREEN_CLASS} mr-3 text-xl`}
-                      ></i>{" "}
-                      Alamat Pengiriman
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="#"
-                      className="flex items-center p-2 text-[#2B2B2B] hover:bg-[#374151]"
-                    >
-                      <i
-                        className={`fas fa-cog ${COLOR_PRIMARY_GREEN_CLASS} mr-3 text-xl`}
-                      ></i>{" "}
-                      Pengaturan
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="#"
-                      className="flex items-center p-2 text-[#2B2B2B] hover:bg-[#374151]"
-                    >
-                      <i
-                        className={`fas fa-question-circle ${COLOR_PRIMARY_GREEN_CLASS} mr-3 text-xl`}
-                      ></i>{" "}
-                      Bantuan
-                    </Link>
-                  </li>
-
-                  <li className="log-out border-t border-gray-700 mt-2 pt-2">
+                  <li className="log-out border-t border-gray-200 mt-2 pt-2">
                     <button
                       onClick={logout}
-                      className="w-full flex items-center p-2 text-red-500 hover:bg-[#374151]"
+                      className="w-full flex items-center p-2 text-red-500 hover:bg-red-50 rounded-md"
                     >
                       <i className="fas fa-sign-out-alt mr-3 text-xl"></i>{" "}
                       Keluar
@@ -413,13 +367,10 @@ export default function Header() {
         </div>
       </div>
 
-      {/* ------------------------------------------------------------------ */}
-      {/* BARIS BAWAH (KATEGORI LINKS) - Warna Terang Non-Putih */}
-      {/* ------------------------------------------------------------------ */}
+      {/* Nav Bawah (TETAP SAMA) */}
       <div
-        className={`nav-bottom bg-[${COLORS.NAV_LIGHT_BG}] border-t border-[#e5e7eb] h-[50px] px-4 md:px-10 flex items-center justify-between relative`}
+        className={`nav-bottom bg-[#f3f4f6] border-t border-[#e5e7eb] h-[50px] px-4 md:px-10 flex items-center justify-between relative`}
       >
-        {/* Mobile Menu Text (Tampil di Mobile) */}
         <div className="mobile-bottom-menu-wrapper flex w-full justify-between items-center md:hidden">
           <div
             className={`mobile-menu-text flex items-center text-[24px] font-bold cursor-pointer ${COLOR_TEXT_DARK_CLASS}`}
@@ -429,8 +380,6 @@ export default function Header() {
             <span className="font-bold">Menu Kategori</span>
           </div>
         </div>
-
-        {/* Desktop Category Links */}
         <div
           className={`nav-links-bottom hidden md:flex items-center gap-[25px] text-[24px] font-bold ${COLOR_TEXT_DARK_CLASS}`}
         >
@@ -450,29 +399,25 @@ export default function Header() {
             Grooming
           </Link>
         </div>
-
-        {/* KATEGORI MOBILE DROPDOWN CONTAINER ... (Tidak diubah) */}
         <div
           id="mobile-category-menu"
-          className={`mobile-category-list absolute top-full left-0 right-0 w-full bg-[${
-            COLORS.DROPDOWN_BG
-          }] shadow-xl z-50 ${
+          className={`mobile-category-list absolute top-full left-0 right-0 w-full bg-white shadow-xl z-50 ${
             isCategoryMobileOpen ? "block" : "hidden"
           } md:hidden`}
         >
-          <ul className="list-none p-0 m-0 text-[24px] font-bold">
+          <ul className="list-none p-0 m-0 text-[24px] font-bold text-[#2b2b2b]">
             <li>
               <Link
                 href="/"
-                className="block p-3 text-white hover:bg-[#374151] hover:text-[#44af7c]"
+                className="block p-3 hover:bg-gray-100 hover:text-[#44af7c]"
               >
                 Beranda
               </Link>
             </li>
             <li>
               <Link
-                href="/"
-                className="block p-3 text-white hover:bg-[#374151] hover:text-[#44af7c]"
+                href="/products"
+                className="block p-3 hover:bg-gray-100 hover:text-[#44af7c]"
               >
                 Semua Produk
               </Link>
@@ -480,7 +425,7 @@ export default function Header() {
             <li>
               <Link
                 href="#"
-                className="block p-3 text-white hover:bg-[#374151] hover:text-[#44af7c]"
+                className="block p-3 hover:bg-gray-100 hover:text-[#44af7c]"
               >
                 Vitamin Kucing
               </Link>
@@ -488,17 +433,9 @@ export default function Header() {
             <li>
               <Link
                 href="#"
-                className="block p-3 text-white hover:bg-[#374151] hover:text-[#44af7c]"
+                className="block p-3 hover:bg-gray-100 hover:text-[#44af7c]"
               >
                 Grooming
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="#"
-                className="block p-3 text-white hover:bg-[#374151] hover:text-[#44af7c]"
-              >
-                Ide Hadiah
               </Link>
             </li>
           </ul>
