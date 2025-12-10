@@ -344,7 +344,7 @@ export default function OrderDetailPage() {
   return (
     <>
       <Header />
-      <div className="p-6 pt-[140px] max-w-2xl mx-auto">
+      <div className="p-6 pt-5 max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold mb-2 text-[#2b2b2b]">
           Detail Pesanan #{order.id}
         </h1>

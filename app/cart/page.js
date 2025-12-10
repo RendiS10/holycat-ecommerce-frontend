@@ -243,9 +243,7 @@ export default function CartPage() {
       <>
         {" "}
         <Header />{" "}
-        <div className="p-6 pt-[120px] max-w-4xl mx-auto">
-          Loading cart...
-        </div>{" "}
+        <div className="p-6 pt-5 max-w-4xl mx-auto">Loading cart...</div>{" "}
       </>
     );
   if (error && !cart)
@@ -253,7 +251,7 @@ export default function CartPage() {
       <>
         {" "}
         <Header />{" "}
-        <div className="p-6 pt-[120px] max-w-4xl mx-auto text-red-600">
+        <div className="p-6 pt-5 max-w-4xl mx-auto text-red-600">
           {" "}
           Error: {error}{" "}
         </div>{" "}
@@ -263,7 +261,7 @@ export default function CartPage() {
   return (
     <>
       <Header />
-      <div className="p-6 pt-[120px] max-w-4xl mx-auto">
+      <div className="p-6 pt-5 max-w-4xl mx-auto">
         <h2 className="text-2xl font-bold mb-4">Keranjang Belanja Anda</h2>
         {!cart || !cart.items || cart.items.length === 0 ? (
           <div className="bg-white p-8 rounded shadow text-center">

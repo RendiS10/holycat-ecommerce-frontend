@@ -130,7 +130,7 @@ export default function OrdersPage() {
   return (
     <>
       <Header />
-      <div className="p-6 pt-[140px] max-w-4xl mx-auto">
+      <div className="p-6 pt-5 max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold mb-6 text-[#2b2b2b]">
           Riwayat Pesanan Saya
         </h1>
