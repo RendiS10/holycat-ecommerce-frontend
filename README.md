@@ -1,54 +1,47 @@
 # 🐱 HolyCat E-Commerce - Frontend
 
-Frontend aplikasi HolyCat E-Commerce ini dibangun menggunakan **Next.js 15 (App Router)**. Aplikasi ini menyediakan antarmuka modern yang responsif untuk pengalaman belanja pelanggan serta dashboard admin yang komprehensif untuk pengelolaan toko.
-
----
+Frontend aplikasi HolyCat E-Commerce yang dibangun menggunakan **Next.js 15 (App Router)**. Aplikasi ini menyediakan antarmuka modern dan responsif untuk pelanggan berbelanja dan panel administrasi yang lengkap untuk mengelola toko.
 
 ## 🚀 Fitur Utama
 
 ### 🛒 Fitur Pelanggan (Customer)
 
-- **Katalog Produk:** Menampilkan daftar produk dengan harga, stok, dan gambar dalam tata letak grid responsif.
-- **Pencarian & Filter:**
-  - Cari produk berdasarkan kata kunci.
-  - Filter produk berdasarkan kategori (Obat, Vitamin, Grooming, dll).
-- **Manajemen Keranjang:**
-  - Tambah produk ke keranjang (validasi stok _real-time_).
-  - Ubah kuantitas atau hapus item.
-  - Pilih item tertentu untuk di-_checkout_.
+- **Katalog Produk:** Menampilkan daftar produk dengan tampilan grid, harga, dan stok.
+- **Pencarian & Filter:** Cari produk berdasarkan nama dan filter berdasarkan kategori (Obat, Vitamin, Grooming, dll).
+- **Manajemen Keranjang:** Tambah produk, ubah kuantitas, hapus item, dan pilih item tertentu untuk checkout.
 - **Checkout & Pembayaran:**
-  - **Integrasi Midtrans Snap:** Pembayaran otomatis via Virtual Account, QRIS, & E-Wallet.
-  - **Pembayaran Manual:** Opsi upload bukti transfer untuk verifikasi manual.
+  - Integrasi **Midtrans Snap** untuk pembayaran otomatis (Virtual Account, E-Wallet).
+  - Opsi pembayaran manual (Upload Bukti Transfer).
 - **Manajemen Pesanan:**
-  - Riwayat pesanan lengkap dengan status warna-warni.
-  - **Pelacakan Pengiriman:** Informasi kurir dan nomor resi yang dapat dilihat langsung.
-  - Pembatalan pesanan (jika status masih "Menunggu Pembayaran" atau "Diproses").
-- **Manajemen Profil:** Edit biodata diri dan alamat pengiriman.
-- **Autentikasi:** Sistem Login dan Register aman menggunakan JWT (_HttpOnly Cookie_).
+  - Lihat riwayat pesanan dan detail status.
+  - Pelacakan pengiriman (Info Kurir & No. Resi).
+  - Batalkan pesanan (jika belum diproses).
+- **Profil Pengguna:** Edit data diri dan alamat pengiriman.
+- **Autentikasi:** Login dan Register aman menggunakan JWT (HttpOnly Cookie).
 
 ### 👑 Fitur Admin (Dashboard)
 
-- **Dashboard Statistik:** Ringkasan metrik penting (Total User, Total Pesanan, Pendapatan Bersih, Produk Terjual).
-- **Manajemen Produk (CRUD):** Tambah, Edit, dan Hapus data produk, termasuk manajemen stok dan kategori.
+- **Dashboard Statistik:** Ringkasan total user, pesanan, pendapatan, dan produk terjual.
+- **Manajemen Produk (CRUD):** Tambah, Edit, dan Hapus produk beserta gambar dan stok.
 - **Manajemen Pesanan:**
-  - Update status pesanan (Diproses, Dikemas, Dikirim, Selesai).
-  - **Input Resi:** Form khusus untuk memasukkan kurir dan nomor resi saat status diubah menjadi "Dikirim".
+  - Ubah status pesanan (Diproses, Dikemas, Dikirim, Selesai).
+  - Input Nomor Resi dan Kurir saat status diubah ke "Dikirim".
 - **Laporan & Ekspor:**
-  - Visualisasi grafik pendapatan harian menggunakan **Chart.js**.
-  - Filter laporan berdasarkan rentang tanggal dan status pesanan.
-  - **Ekspor CSV:** Unduh data laporan penjualan dalam format CSV.
+  - Visualisasi grafik pendapatan harian (Chart.js).
+  - Filter laporan berdasarkan rentang tanggal dan status.
+  - Ekspor data pesanan ke file **CSV**.
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠️ Teknologi yang Digunakan
 
 - **Framework:** [Next.js 15](https://nextjs.org/) (App Router)
 - **Styling:** [Tailwind CSS 4](https://tailwindcss.com/)
 - **HTTP Client:** [Axios](https://axios-http.com/)
-- **State Management:** React Hooks (`useState`, `useEffect`, `useContext`)
+- **State Management:** React Hooks (`useState`, `useContext`) & Zustand
 - **Form Handling:** [React Hook Form](https://react-hook-form.com/)
-- **Notifikasi:** [SweetAlert2](https://sweetalert2.github.io/) & Custom Toast Component
-- **Visualisasi Data:** [Chart.js](https://www.chartjs.org/) & React-Chartjs-2
+- **Notifikasi:** [SweetAlert2](https://sweetalert2.github.io/) & Custom Toast Provider
+- **Visualisasi Data:** [Chart.js](https://www.chartjs.org/) & React Chartjs 2
 - **Payment Gateway:** Midtrans Snap (Client Script)
 - **Testing:** [Cypress](https://www.cypress.io/) (E2E Testing)
 
@@ -59,7 +52,7 @@ Frontend aplikasi HolyCat E-Commerce ini dibangun menggunakan **Next.js 15 (App 
 Sebelum menjalankan frontend, pastikan:
 
 1.  **Node.js** (versi 18 atau terbaru) sudah terinstal.
-2.  **Backend** (`ecommerce-backend`) sudah berjalan di port default (`http://localhost:4000`).
+2.  **Backend** (`ecommerce-backend`) sudah berjalan di `http://localhost:4000`.
 
 ---
 
@@ -71,91 +64,67 @@ Sebelum menjalankan frontend, pastikan:
 cd ecommerce-frontend
 ```
 
-Ini adalah dokumen README.md yang lengkap dan terstruktur untuk folder ecommerce-frontend. Dokumen ini mencakup semua detail teknis, fitur, dan panduan instalasi yang sesuai dengan arsitektur proyek HolyCat E-Commerce Anda.Silakan salin konten di bawah ini ke dalam file ecommerce-frontend/README.md.Markdown# 🐱 HolyCat E-Commerce - Frontend
+### 2. Instal Dependensi
 
-Frontend aplikasi HolyCat E-Commerce ini dibangun menggunakan **Next.js 15 (App Router)**. Aplikasi ini menyediakan antarmuka modern yang responsif untuk pengalaman belanja pelanggan serta dashboard admin yang komprehensif untuk pengelolaan toko.
-
----
-
-## 🚀 Fitur Utama
-
-### 🛒 Fitur Pelanggan (Customer)
-
-- **Katalog Produk:** Menampilkan daftar produk dengan harga, stok, dan gambar dalam tata letak grid responsif.
-- **Pencarian & Filter:**
-  - Cari produk berdasarkan kata kunci.
-  - Filter produk berdasarkan kategori (Obat, Vitamin, Grooming, dll).
-- **Manajemen Keranjang:**
-  - Tambah produk ke keranjang (validasi stok _real-time_).
-  - Ubah kuantitas atau hapus item.
-  - Pilih item tertentu untuk di-_checkout_.
-- **Checkout & Pembayaran:**
-  - **Integrasi Midtrans Snap:** Pembayaran otomatis via Virtual Account, QRIS, & E-Wallet.
-  - **Pembayaran Manual:** Opsi upload bukti transfer untuk verifikasi manual.
-- **Manajemen Pesanan:**
-  - Riwayat pesanan lengkap dengan status warna-warni.
-  - **Pelacakan Pengiriman:** Informasi kurir dan nomor resi yang dapat dilihat langsung.
-  - Pembatalan pesanan (jika status masih "Menunggu Pembayaran" atau "Diproses").
-- **Manajemen Profil:** Edit biodata diri dan alamat pengiriman.
-- **Autentikasi:** Sistem Login dan Register aman menggunakan JWT (_HttpOnly Cookie_).
-
-### 👑 Fitur Admin (Dashboard)
-
-- **Dashboard Statistik:** Ringkasan metrik penting (Total User, Total Pesanan, Pendapatan Bersih, Produk Terjual).
-- **Manajemen Produk (CRUD):** Tambah, Edit, dan Hapus data produk, termasuk manajemen stok dan kategori.
-- **Manajemen Pesanan:**
-  - Update status pesanan (Diproses, Dikemas, Dikirim, Selesai).
-  - **Input Resi:** Form khusus untuk memasukkan kurir dan nomor resi saat status diubah menjadi "Dikirim".
-- **Laporan & Ekspor:**
-  - Visualisasi grafik pendapatan harian menggunakan **Chart.js**.
-  - Filter laporan berdasarkan rentang tanggal dan status pesanan.
-  - **Ekspor CSV:** Unduh data laporan penjualan dalam format CSV.
-
----
-
-## 🛠️ Tech Stack
-
-- **Framework:** [Next.js 15](https://nextjs.org/) (App Router)
-- **Styling:** [Tailwind CSS 4](https://tailwindcss.com/)
-- **HTTP Client:** [Axios](https://axios-http.com/)
-- **State Management:** React Hooks (`useState`, `useEffect`, `useContext`)
-- **Form Handling:** [React Hook Form](https://react-hook-form.com/)
-- **Notifikasi:** [SweetAlert2](https://sweetalert2.github.io/) & Custom Toast Component
-- **Visualisasi Data:** [Chart.js](https://www.chartjs.org/) & React-Chartjs-2
-- **Payment Gateway:** Midtrans Snap (Client Script)
-- **Testing:** [Cypress](https://www.cypress.io/) (E2E Testing)
-
----
-
-## ⚙️ Prasyarat
-
-Sebelum menjalankan frontend, pastikan:
-
-1.  **Node.js** (versi 18 atau terbaru) sudah terinstal.
-2.  **Backend** (`ecommerce-backend`) sudah berjalan di port default (`http://localhost:4000`).
-
----
-
-## 📦 Instalasi & Menjalankan Aplikasi
-
-### 1. Masuk ke direktori frontend
+Kami merekomendasikan menggunakan **pnpm** (atau npm).
 
 ```bash
-cd ecommerce-frontend
-2. Instal DependensiDirekomendasikan menggunakan pnpm untuk efisiensi disk space.Bash# Menggunakan pnpm (Disarankan)
+# Menggunakan pnpm (Disarankan)
 pnpm install
 
 # Atau menggunakan npm
 npm install
-3. Konfigurasi Environment VariablesBuat file .env.local di root folder ecommerce-frontend dan tambahkan Client Key Midtrans Anda:Cuplikan kode# Ganti dengan Client Key dari Dashboard Midtrans (Sandbox/Production)
+```
+
+### 3. Konfigurasi Environment Variables
+
+Buat file `.env.local` di root folder `ecommerce-frontend` dan tambahkan Client Key Midtrans Anda (sesuai mode Sandbox/Production):
+
+```env
 NEXT_PUBLIC_MIDTRANS_CLIENT_KEY="SB-Mid-client-xxxxxxxxxxxx"
-Catatan: URL Backend dikonfigurasi di app/lib/axiosClient.js atau secara langsung di komponen. Default mengarah ke http://localhost:4000.4. Jalankan Server DevelopmentBash# Menggunakan pnpm
+```
+
+> **Catatan:** Aplikasi dikonfigurasi secara _hardcoded_ untuk menghubungi backend di `http://localhost:4000` via Axios. Jika backend berjalan di URL lain, sesuaikan konfigurasi di `app/lib/axiosClient.js` atau komponen terkait.
+
+### 4. Jalankan Server Development
+
+```bash
+# Menggunakan pnpm
 pnpm run dev
 
 # Atau menggunakan npm
 npm run dev
-Akses aplikasi di browser melalui http://localhost:3000.🧪 Pengujian (Testing)Proyek ini menggunakan Cypress untuk End-to-End (E2E) Testing, mensimulasikan interaksi pengguna nyata.Menjalankan CypressPastikan server Backend (port 4000) dan Frontend (port 3000) keduanya sedang berjalan.Buka Cypress Test Runner:Bashnpx cypress open
-Pilih E2E Testing.Pilih browser (misal: Chrome).Pilih file tes yang ingin dijalankan:spec.cy.js: Tes alur Login dasar & validasi elemen UI.checkout.cy.js: Tes alur belanja lengkap (Login -> Tambah ke Keranjang -> Checkout).order-tracking.cy.js: Tes validasi riwayat pesanan dan detail status.📂 Struktur Folder Utamaecommerce-frontend/
+```
+
+Buka [http://localhost:3000](http://localhost:3000) di browser Anda.
+
+---
+
+## 🧪 Pengujian (Testing)
+
+Proyek ini menggunakan **Cypress** untuk _End-to-End (E2E) Testing_.
+
+### Menjalankan Cypress
+
+Pastikan server backend (port 4000) dan frontend (port 3000) **keduanya sedang berjalan**.
+
+1.  Buka Cypress Test Runner:
+    ```bash
+    npx cypress open
+    ```
+2.  Pilih **E2E Testing**.
+3.  Pilih browser (misal: Chrome).
+4.  Pilih file tes yang ingin dijalankan:
+    - **`spec.cy.js`**: Tes alur Login dasar.
+    - **`checkout.cy.js`**: Tes alur belanja lengkap (Login -> Add to Cart -> Checkout).
+    - **`order-tracking.cy.js`**: Tes melihat riwayat dan detail pesanan.
+
+---
+
+## 📂 Struktur Folder Utama
+
+```
+ecommerce-frontend/
 ├── app/
 │   ├── admin/           # Halaman khusus Admin (Dashboard, Produk, Order, Laporan)
 │   │   ├── login/       # Login khusus Admin
@@ -164,18 +133,35 @@ Pilih E2E Testing.Pilih browser (misal: Chrome).Pilih file tes yang ingin dijala
 │   │   └── reports/     # Laporan & Grafik
 │   ├── cart/            # Halaman Keranjang
 │   ├── checkout/        # Halaman Checkout
-│   ├── components/      # Komponen UI Reusable (Header, ProductCard, Toast, dll)
-│   ├── lib/             # Helper functions (Axios Client, Swal Helper)
+│   ├── components/      # Komponen UI (Header, ProductCard, Toast, dll)
+│   ├── lib/             # Helper functions (Axios, Swal)
 │   ├── login/           # Halaman Login Customer
 │   ├── order/           # Halaman Detail Pesanan (Pembayaran & Tracking)
-│   ├── orders/          # Halaman Riwayat Pesanan User
+│   ├── orders/          # Halaman Riwayat Pesanan
 │   ├── products/        # Halaman Listing & Detail Produk
 │   ├── profile/         # Halaman Profil User
 │   ├── register/        # Halaman Registrasi
 │   ├── layout.js        # Layout utama (termasuk script Midtrans)
-│   └── page.js          # Halaman Utama (Landing Page)
+│   └── page.js          # Halaman Utama (Home)
 ├── cypress/             # File pengujian E2E
-├── public/              # Aset statis (gambar, icon, svg)
+├── public/              # Aset statis (gambar, icon)
 └── ...
-🎨 Akun Demo (Seed Data)Gunakan akun berikut untuk pengujian (pastikan Anda sudah menjalankan npm run seed di backend):RoleEmailPasswordAdmintest@example.comsecretCustomer(Silakan daftar akun baru)-Dibuat oleh Rendi Sutendi
 ```
+
+---
+
+## 🎨 Panduan Akun (Seed Data)
+
+Untuk pengujian, Anda dapat menggunakan akun yang telah dibuat oleh seeder backend:
+
+- **Akun Admin:**
+
+  - Email: `test@example.com`
+  - Password: `secret`
+
+- **Akun Customer:**
+  - Silakan registrasi akun baru melalui halaman `/register`.
+
+---
+
+_Dibuat oleh Rendi Sutendi_
