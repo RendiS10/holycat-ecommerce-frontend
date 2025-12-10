@@ -261,6 +261,10 @@ export default function CartPage() {
   return (
     <>
       <Header />
+      <br />
+      <br />
+      <br />
+      <br />
       <div className="p-6 pt-5 max-w-4xl mx-auto">
         <h2 className="text-2xl font-bold mb-4">Keranjang Belanja Anda</h2>
         {!cart || !cart.items || cart.items.length === 0 ? (

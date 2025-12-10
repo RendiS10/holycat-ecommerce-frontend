@@ -1,63 +1,182 @@
-This is the Next.js frontend for the holycat-ecommerce sample app. It uses the App Router and Tailwind CSS for layout and styling.
+🐱 HolyCat E-Commerce - Frontend
 
-Features implemented
+Frontend aplikasi HolyCat E-Commerce yang dibangun menggunakan Next.js 15 (App Router). Aplikasi ini menyediakan antarmuka modern dan responsif untuk pelanggan berbelanja dan panel administrasi yang lengkap untuk mengelola toko.
 
-- Product listing and product detail pages.
-- Register and Login pages wired to the backend auth endpoints.
-- Cart UI with add/view/update/remove operations.
-- Global toast notifications (`ToastProvider`) used for success/error messages.
+🚀 Fitur Utama
 
-Quickstart (frontend)
+🛒 Fitur Pelanggan (Customer)
 
-1. Install dependencies
+Katalog Produk: Menampilkan daftar produk dengan tampilan grid, harga, dan stok.
 
-```powershell
+Pencarian & Filter: Cari produk berdasarkan nama dan filter berdasarkan kategori (Obat, Vitamin, Grooming, dll).
+
+Manajemen Keranjang: Tambah produk, ubah kuantitas, hapus item, dan pilih item tertentu untuk checkout.
+
+Checkout & Pembayaran:
+
+Integrasi Midtrans Snap untuk pembayaran otomatis (Virtual Account, E-Wallet).
+
+Opsi pembayaran manual (Upload Bukti Transfer).
+
+Manajemen Pesanan:
+
+Lihat riwayat pesanan dan detail status.
+
+Pelacakan pengiriman (Info Kurir & No. Resi).
+
+Batalkan pesanan (jika belum diproses).
+
+Profil Pengguna: Edit data diri dan alamat pengiriman.
+
+Autentikasi: Login dan Register aman menggunakan JWT (HttpOnly Cookie).
+
+👑 Fitur Admin (Dashboard)
+
+Dashboard Statistik: Ringkasan total user, pesanan, pendapatan, dan produk terjual.
+
+Manajemen Produk (CRUD): Tambah, Edit, dan Hapus produk beserta gambar dan stok.
+
+Manajemen Pesanan:
+
+Ubah status pesanan (Diproses, Dikemas, Dikirim, Selesai).
+
+Input Nomor Resi dan Kurir saat status diubah ke "Dikirim".
+
+Laporan & Ekspor:
+
+Visualisasi grafik pendapatan harian (Chart.js).
+
+Filter laporan berdasarkan rentang tanggal dan status.
+
+Ekspor data pesanan ke file CSV.
+
+🛠️ Teknologi yang Digunakan
+
+Framework: Next.js 15 (App Router)
+
+Styling: Tailwind CSS 4
+
+HTTP Client: Axios
+
+State Management: React Hooks (useState, useContext) & Zustand
+
+Form Handling: React Hook Form
+
+Notifikasi: SweetAlert2 & Custom Toast Provider
+
+Visualisasi Data: Chart.js & React Chartjs 2
+
+Payment Gateway: Midtrans Snap (Client Script)
+
+Testing: Cypress (E2E Testing)
+
+⚙️ Prasyarat
+
+Sebelum menjalankan frontend, pastikan:
+
+Node.js (versi 18 atau terbaru) sudah terinstal.
+
+Backend (ecommerce-backend) sudah berjalan di http://localhost:4000.
+
+📦 Instalasi & Menjalankan Aplikasi
+
+1. Masuk ke direktori frontend
+
 cd ecommerce-frontend
+
+2. Instal Dependensi
+
+Kami merekomendasikan menggunakan pnpm (atau npm).
+
+# Menggunakan pnpm (Disarankan)
+
+pnpm install
+
+# Atau menggunakan npm
+
 npm install
-```
 
-2. Start the dev server
+3. Konfigurasi Environment Variables
 
-```powershell
+Buat file .env.local di root folder ecommerce-frontend dan tambahkan Client Key Midtrans Anda (sesuai mode Sandbox/Production):
+
+NEXT_PUBLIC_MIDTRANS_CLIENT_KEY="SB-Mid-client-xxxxxxxxxxxx"
+
+Catatan: Aplikasi dikonfigurasi secara hardcoded untuk menghubungi backend di http://localhost:4000 via Axios. Jika backend berjalan di URL lain, sesuaikan konfigurasi di app/lib/axiosClient.js atau komponen terkait.
+
+4. Jalankan Server Development
+
+# Menggunakan pnpm
+
+pnpm run dev
+
+# Atau menggunakan npm
+
 npm run dev
-```
 
-Open http://localhost:3000 in the browser. The frontend is typically served on port 3000.
+Buka http://localhost:3000 di browser Anda.
 
-Connecting to the backend
+🧪 Pengujian (Testing)
 
-- The frontend expects the backend API at `http://localhost:4000` by default. The backend must be running for auth and cart flows to work.
-- Because the backend sets an httpOnly cookie on login, the frontend must send credentials with requests. The code calls axios with `withCredentials: true` so that cookies are included automatically.
+Proyek ini menggunakan Cypress untuk End-to-End (E2E) Testing.
 
-Pages & Components
+Menjalankan Cypress
 
-- `app/page.js` — homepage
-- `app/products` — product listing
-- `app/products/[id]` — product detail with `AddToCartButton` component
-- `app/login/page.js` — login form (show/hide password, toasts on success/error)
-- `app/register/page.js` — register form (show/hide password, toasts)
-- `app/cart/page.js` — cart view with quantity controls and remove
-- `app/components/ToastProvider.js` — global toast system (listens for `window.dispatchEvent(new CustomEvent('toast', { detail }))`)
-- `app/components/Header.js` — header that shows auth state and cart count (listens for `authChanged` and `cartUpdated` events).
+Pastikan server backend (port 4000) dan frontend (port 3000) keduanya sedang berjalan.
 
-Notes and recommendations
+Buka Cypress Test Runner:
 
-- The app uses cookie-based auth (httpOnly cookie). For this reason you should enable CORS with credentials on the backend (already done in the sample) and keep using `withCredentials` on frontend requests.
-- Because cookies are used, add CSRF protection before deploying to production (e.g. double-submit token or `csurf`).
-- Product images are currently placeholders — to show real product images, update the backend seed or product records with image URLs and adjust `ProductCard` to render them.
-- The toast system is implemented as a simple global listener — you can replace it with a library like react-hot-toast if you prefer.
+npx cypress open
 
-Build & deploy
+Pilih E2E Testing.
 
-```powershell
-# build
-npm run build
+Pilih browser (misal: Chrome).
 
-# preview
-npm run start
-```
+Pilih file tes yang ingin dijalankan:
 
-Testing & development tips
+spec.cy.js: Tes alur Login dasar.
 
-- Start the backend first (see `ecommerce-backend/README.md`), then start the frontend.
-- Use the seeded test user (email: `test@example.com`, password: `secret`) to exercise login + cart flows.
+checkout.cy.js: Tes alur belanja lengkap (Login -> Add to Cart -> Checkout).
+
+order-tracking.cy.js: Tes melihat riwayat dan detail pesanan.
+
+📂 Struktur Folder Utama
+
+ecommerce-frontend/
+├── app/
+│ ├── admin/ # Halaman khusus Admin (Dashboard, Produk, Order, Laporan)
+│ │ ├── login/ # Login khusus Admin
+│ │ ├── orders/ # Manajemen Pesanan
+│ │ ├── products/ # CRUD Produk
+│ │ └── reports/ # Laporan & Grafik
+│ ├── cart/ # Halaman Keranjang
+│ ├── checkout/ # Halaman Checkout
+│ ├── components/ # Komponen UI (Header, ProductCard, Toast, dll)
+│ ├── lib/ # Helper functions (Axios, Swal)
+│ ├── login/ # Halaman Login Customer
+│ ├── order/ # Halaman Detail Pesanan (Pembayaran & Tracking)
+│ ├── orders/ # Halaman Riwayat Pesanan
+│ ├── products/ # Halaman Listing & Detail Produk
+│ ├── profile/ # Halaman Profil User
+│ ├── register/ # Halaman Registrasi
+│ ├── layout.js # Layout utama (termasuk script Midtrans)
+│ └── page.js # Halaman Utama (Home)
+├── cypress/ # File pengujian E2E
+├── public/ # Aset statis (gambar, icon)
+└── ...
+
+🎨 Panduan Akun (Seed Data)
+
+Untuk pengujian, Anda dapat menggunakan akun yang telah dibuat oleh seeder backend:
+
+Akun Admin:
+
+Email: test@example.com
+
+Password: secret
+
+Akun Customer:
+
+Silakan registrasi akun baru melalui halaman /register.
+
+Dibuat oleh Tim Pengembang HolyCat E-Commerce
