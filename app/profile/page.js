@@ -103,6 +103,8 @@ export default function ProfilePage() {
   return (
     <>
       <Header />
+      <br />
+      <br />
       <div className="p-6 pt-5 max-w-lg mx-auto">
         <h1 className="text-3xl font-bold mb-6 text-[#2b2b2b]">
           Edit Profil Anda

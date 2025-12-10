@@ -41,6 +41,10 @@ export default async function ProductsPage(props) {
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
       <Header />
+      <br />
+      <br />
+      <br />
+      <br />
       <div className="p-6 pt-5 max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold capitalize">{getPageTitle()}</h1>

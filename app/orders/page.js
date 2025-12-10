@@ -130,6 +130,10 @@ export default function OrdersPage() {
   return (
     <>
       <Header />
+      <br />
+      <br />
+      <br />
+      <br />
       <div className="p-6 pt-5 max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold mb-6 text-[#2b2b2b]">
           Riwayat Pesanan Saya
@@ -163,7 +167,7 @@ export default function OrdersPage() {
                     className="bg-white rounded-lg shadow border flex flex-col sm:flex-row gap-4 items-center p-4"
                   >
                     {/* Preview Gambar */}
-                    <div className="w-16 h-16 bg-gray-100 rounded flex-shrink-0 flex items-center justify-center text-gray-400 text-xs">
+                    <div className="w-16 h-16 bg-gray-100 rounded shrink-0 flex items-center justify-center text-gray-400 text-xs">
                       {firstItem?.image ? (
                         <img
                           src={firstItem.image}

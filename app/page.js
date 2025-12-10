@@ -19,9 +19,12 @@ export default async function Home() {
     <div className="min-h-screen bg-gray-50 text-gray-900">
       <Header />
 
+      <br />
+      <br />
+      <br />
       <main className="max-w-7xl mx-auto px-6 py-12">
         {/* Hero */}
-        <section className="relative grid grid-cols-1 lg:grid-cols-3 gap-6 items-center mb-12 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl overflow-hidden">
+        <section className="relative  grid grid-cols-1 lg:grid-cols-3 gap-6 items-center mb-12 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl overflow-hidden">
           {/* Decorative elements */}
           <div className="absolute top-10 right-20 w-32 h-32 bg-slate-700/30 rounded-full blur-3xl"></div>
           <div className="absolute bottom-20 left-20 w-40 h-40 bg-slate-700/20 rounded-full blur-3xl"></div>
