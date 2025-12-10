@@ -371,74 +371,114 @@ export default function Header() {
       <div
         className={`nav-bottom bg-[#f3f4f6] border-t border-[#e5e7eb] h-[50px] px-4 md:px-10 flex items-center justify-between relative`}
       >
-        <div className="mobile-bottom-menu-wrapper flex w-full justify-between items-center md:hidden">
-          <div
-            className={`mobile-menu-text flex items-center text-[24px] font-bold cursor-pointer ${COLOR_TEXT_DARK_CLASS}`}
-            onClick={toggleMobileCategoryMenu}
-          >
-            <i className="fas fa-bars mr-2 text-xl"></i>{" "}
-            <span className="font-bold">Menu Kategori</span>
+        <div
+          className={`nav-bottom bg-[#f3f4f6] border-t border-[#e5e7eb] h-[50px] px-4 md:px-10 flex items-center justify-between relative`}
+        >
+          {/* Mobile Menu Text */}
+          <div className="mobile-bottom-menu-wrapper flex w-full justify-between items-center md:hidden">
+            <div
+              className={`mobile-menu-text flex items-center text-[24px] font-bold cursor-pointer ${COLOR_TEXT_DARK_CLASS}`}
+              onClick={toggleMobileCategoryMenu}
+            >
+              <i className="fas fa-bars mr-2 text-xl"></i>{" "}
+              <span className="font-bold">Menu Kategori</span>
+            </div>
           </div>
-        </div>
-        <div
-          className={`nav-links-bottom hidden md:flex items-center gap-[25px] text-[24px] font-bold ${COLOR_TEXT_DARK_CLASS}`}
-        >
-          <Link href="/" className="hover:text-[#44af7c]">
-            Beranda
-          </Link>
-          <Link href="/products" className="hover:text-[#44af7c]">
-            Semua Produk
-          </Link>
-          <Link href="#" className="hover:text-[#44af7c]">
-            Obat
-          </Link>
-          <Link href="#" className="hover:text-[#44af7c]">
-            Suplemen & Vitamin
-          </Link>
-          <Link href="#" className="hover:text-[#44af7c]">
-            Grooming
-          </Link>
-        </div>
-        <div
-          id="mobile-category-menu"
-          className={`mobile-category-list absolute top-full left-0 right-0 w-full bg-white shadow-xl z-50 ${
-            isCategoryMobileOpen ? "block" : "hidden"
-          } md:hidden`}
-        >
-          <ul className="list-none p-0 m-0 text-[24px] font-bold text-[#2b2b2b]">
-            <li>
-              <Link
-                href="/"
-                className="block p-3 hover:bg-gray-100 hover:text-[#44af7c]"
-              >
-                Beranda
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/products"
-                className="block p-3 hover:bg-gray-100 hover:text-[#44af7c]"
-              >
-                Semua Produk
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="#"
-                className="block p-3 hover:bg-gray-100 hover:text-[#44af7c]"
-              >
-                Vitamin Kucing
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="#"
-                className="block p-3 hover:bg-gray-100 hover:text-[#44af7c]"
-              >
-                Grooming
-              </Link>
-            </li>
-          </ul>
+
+          {/* Desktop Category Links - PERBAIKAN LINK */}
+          <div
+            className={`nav-links-bottom hidden md:flex items-center gap-[25px] text-[24px] font-bold ${COLOR_TEXT_DARK_CLASS}`}
+          >
+            <Link href="/" className="hover:text-[#44af7c]">
+              Beranda
+            </Link>
+            <Link href="/products" className="hover:text-[#44af7c]">
+              Semua Produk
+            </Link>
+            <Link
+              href="/products?category=Obat"
+              className="hover:text-[#44af7c]"
+            >
+              Obat
+            </Link>
+            <Link
+              href="/products?category=Suplemen_dan_Vitamin"
+              className="hover:text-[#44af7c]"
+            >
+              Suplemen & Vitamin
+            </Link>
+            <Link
+              href="/products?category=Grooming"
+              className="hover:text-[#44af7c]"
+            >
+              Grooming
+            </Link>
+            <Link
+              href="/products?category=Produk_Lainnya"
+              className="hover:text-[#44af7c]"
+            >
+              Lainnya
+            </Link>
+          </div>
+
+          {/* KATEGORI MOBILE DROPDOWN - PERBAIKAN LINK */}
+          <div
+            id="mobile-category-menu"
+            className={`mobile-category-list absolute top-full left-0 right-0 w-full bg-white shadow-xl z-50 ${
+              isCategoryMobileOpen ? "block" : "hidden"
+            } md:hidden`}
+          >
+            <ul className="list-none p-0 m-0 text-[24px] font-bold text-[#2b2b2b]">
+              <li>
+                <Link
+                  href="/"
+                  className="block p-3 hover:bg-gray-100 hover:text-[#44af7c]"
+                >
+                  Beranda
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/products"
+                  className="block p-3 hover:bg-gray-100 hover:text-[#44af7c]"
+                >
+                  Semua Produk
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/products?category=Obat"
+                  className="block p-3 hover:bg-gray-100 hover:text-[#44af7c]"
+                >
+                  Obat
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/products?category=Suplemen_dan_Vitamin"
+                  className="block p-3 hover:bg-gray-100 hover:text-[#44af7c]"
+                >
+                  Suplemen & Vitamin
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/products?category=Grooming"
+                  className="block p-3 hover:bg-gray-100 hover:text-[#44af7c]"
+                >
+                  Grooming
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/products?category=Produk_Lainnya"
+                  className="block p-3 hover:bg-gray-100 hover:text-[#44af7c]"
+                >
+                  Lainnya
+                </Link>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </header>

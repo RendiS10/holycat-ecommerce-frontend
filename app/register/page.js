@@ -95,7 +95,7 @@ export default function RegisterPage() {
       <Header />
       {/* Tambahkan padding-top untuk mengimbangi fixed header */}
       <section
-        className={`auth-section ${COLOR_LIGHT_GREEN_BG} flex min-h-screen items-center justify-center p-10 md:p-16 pt-[120px]`}
+        className={`auth-section ${COLOR_LIGHT_GREEN_BG} flex min-h-screen items-center justify-center p-10 md:p-16 pt-5`}
       >
         {/* auth-card */}
         <div

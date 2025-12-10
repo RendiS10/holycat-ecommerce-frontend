@@ -31,17 +31,17 @@ export default async function Home() {
           <div className="lg:col-span-2 text-white p-10 lg:p-16 relative z-10">
             <p className="text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
               <span className="w-8 h-0.5 bg-red-500"></span>
-              Best Gadget & Gear
+              Best Products
             </p>
             <h1 className="text-5xl lg:text-6xl font-bold mb-4 leading-tight">
-              Best Summer
+              PROMO
               <br />
-              Collection
+              AKHIR TAHUN
             </h1>
-            <p className="mb-8 max-w-lg text-gray-300">
+            {/* <p className="mb-8 max-w-lg text-gray-300">
               There are many variations of passages of available majority have
               suffered alteration by injected.
-            </p>
+            </p> */}
             <a
               href="/products"
               className="inline-block bg-red-500 hover:bg-red-600 text-white font-semibold px-6 py-3 rounded transition-colors"
@@ -71,7 +71,7 @@ export default async function Home() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <h4 className="font-semibold text-sm text-gray-900">
-                      Amazfit GT2 Smart Watch
+                      Kalung Kucing
                     </h4>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-xs text-gray-400 line-through">
@@ -95,7 +95,7 @@ export default async function Home() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <h4 className="font-semibold text-sm text-gray-900">
-                      Apple Smart Watch
+                      Baju Kucing Nataru
                     </h4>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-xs text-gray-400 line-through">
@@ -119,7 +119,7 @@ export default async function Home() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <h4 className="font-semibold text-sm text-gray-900">
-                      Kislect Ks Pro Smart Watch
+                      Wadah Makanan Kucing Tema Nataru
                     </h4>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-xs text-gray-400 line-through">

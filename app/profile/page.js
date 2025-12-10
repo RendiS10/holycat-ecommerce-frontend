@@ -89,7 +89,7 @@ export default function ProfilePage() {
     return (
       <>
         <Header />
-        <div className="p-6 pt-[120px] max-w-lg mx-auto text-center">
+        <div className="p-6 pt-5 -w-lg mx-auto text-center">
           Loading Profile...
         </div>
       </>
@@ -103,7 +103,7 @@ export default function ProfilePage() {
   return (
     <>
       <Header />
-      <div className="p-6 pt-[120px] max-w-lg mx-auto">
+      <div className="p-6 pt-5 max-w-lg mx-auto">
         <h1 className="text-3xl font-bold mb-6 text-[#2b2b2b]">
           Edit Profil Anda
         </h1>

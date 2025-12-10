@@ -24,7 +24,7 @@ export default async function ProductPage({ params }) {
     return (
       <>
         <Header />
-        <div className="p-6 pt-[120px] max-w-2xl mx-auto text-center">
+        <div className="p-6 pt-5 max-w-2xl mx-auto text-center">
           <h1 className="text-3xl mb-4 font-bold text-red-600">
             Produk Tidak Ditemukan
           </h1>
