@@ -274,7 +274,7 @@ export default function Header() {
                   className="w-[30px] h-[30px] rounded-full mr-[5px] object-cover"
                 />
                 <span className="hidden md:inline font-bold text-[#2b2b2b]">
-                  Akun
+                  Akun Saya
                 </span>
                 <i className="fas fa-caret-down ml-1 text-sm text-[#2b2b2b]"></i>
               </a>
