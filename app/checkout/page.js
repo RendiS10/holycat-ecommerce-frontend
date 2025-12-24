@@ -6,6 +6,14 @@ import Header from "../components/Header";
 import { showSwalAlert } from "../lib/swalHelper";
 import Link from "next/link";
 
+const formatCurrency = (amount) => {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+  }).format(amount);
+};
+
 export default function CheckoutPage() {
   const [cart, setCart] = useState(null); // Tetap fetch semua cart
   const [user, setUser] = useState(null);
@@ -234,7 +242,7 @@ export default function CheckoutPage() {
                         {item.product.title} (x{item.quantity})
                       </span>
                       <span className="font-medium">
-                        ${(item.quantity * item.product.price).toFixed(2)}
+                        {formatCurrency(item.quantity * item.product.price)}
                       </span>
                     </li>
                   ))}
@@ -243,7 +251,7 @@ export default function CheckoutPage() {
                 <div className="flex justify-between font-bold text-lg">
                   <span>Total</span>
                   {/* ==> PERUBAHAN DI SINI: Gunakan checkoutTotal <== */}
-                  <span>${checkoutTotal}</span>
+                  <span>{formatCurrency(checkoutTotal)}</span>
                 </div>
               </div>
 

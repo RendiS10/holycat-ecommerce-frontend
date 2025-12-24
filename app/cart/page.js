@@ -6,6 +6,14 @@ import Header from "../components/Header";
 import { showSwalAlert } from "../lib/swalHelper";
 import { useRouter, useSearchParams } from "next/navigation"; // Tambahkan useSearchParams
 
+const formatCurrency = (amount) => {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+  }).format(amount);
+};
+
 export default function CartPage() {
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -334,16 +342,16 @@ export default function CartPage() {
                       {item.product.title}
                     </div>
                     <div className="text-sm text-gray-600">
-                      ${item.product.price.toFixed(2)}
+                      {formatCurrency(item.product.price)}
                     </div>
                     <div className="text-xs text-gray-500 md:hidden mt-1">
                       {" "}
                       {/* Tampilkan subtotal di mobile */}
-                      Subtotal: $
-                      {(
+                      Subtotal:{" "}
+                      {formatCurrency(
                         (inputQuantities[item.id] || item.quantity) *
-                        item.product.price
-                      ).toFixed(2)}
+                          item.product.price
+                      )}
                     </div>
                   </div>
                   {/* Kontrol Kuantitas */}
@@ -396,11 +404,11 @@ export default function CartPage() {
                   <div className="flex flex-col items-end w-full md:w-auto mt-2 md:mt-0">
                     <div className="text-sm font-semibold hidden md:block">
                       {" "}
-                      {/* Sembunyikan di mobile */}$
-                      {(
+                      {/* Sembunyikan di mobile */}
+                      {formatCurrency(
                         (inputQuantities[item.id] || item.quantity) *
-                        item.product.price
-                      ).toFixed(2)}
+                          item.product.price
+                      )}
                     </div>
                     <button
                       onClick={() => handleRemove(item.id)}
@@ -420,7 +428,7 @@ export default function CartPage() {
               <div className="text-left sm:text-left">
                 <div className="font-semibold">Total Terpilih:</div>
                 <div className="text-xl font-bold text-indigo-600">
-                  ${selectedTotal}
+                  {formatCurrency(selectedTotal)}
                 </div>
               </div>
               <button

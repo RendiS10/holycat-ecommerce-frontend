@@ -8,6 +8,14 @@ const COLOR_PRIMARY_YELLOW = "#ffbf00";
 const COLOR_TEXT_DARK = "#2b2b2b";
 const COLOR_LIGHT_BG = "#f3f4f6";
 
+const formatCurrency = (amount) => {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+  }).format(amount);
+};
+
 export default function ProductDetails({ product }) {
   const stockStatus = product.stock > 0 ? "In Stock" : "Out of Stock";
   const stockColor =
@@ -55,7 +63,7 @@ export default function ProductDetails({ product }) {
           {/* Harga */}
           <div className="my-4 p-4 rounded-lg bg-[#e8f5ef] border-l-4 border-[#44af7c]">
             <span className="text-2xl font-extrabold text-[#44af7c]">
-              ${product.price.toFixed(2)}
+              {formatCurrency(product.price)}
             </span>
           </div>
 
