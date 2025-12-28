@@ -300,6 +300,15 @@ export default function Header() {
                       <li className="px-2 py-1 text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
                         Admin Menu
                       </li>
+                      <Link
+                        href="/admin"
+                        className="flex items-center p-2 text-[#2B2B2B] bg-yellow-50 hover:bg-yellow-100 rounded-md mb-2"
+                      >
+                        <i
+                          className={`fas fa-chart-line ${COLOR_PRIMARY_GREEN_CLASS} mr-3 text-lg w-6 text-center`}
+                        ></i>{" "}
+                        Admin Dashboard
+                      </Link>
                       <li>
                         <Link
                           href="/admin/products"

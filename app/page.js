@@ -78,10 +78,10 @@ export default async function Home() {
                     </h4>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-xs text-gray-400 line-through">
-                        $150.00
+                        Rp.150.000
                       </span>
                       <span className="text-sm font-bold text-gray-900">
-                        $130.00
+                        Rp.130.000
                       </span>
                     </div>
                     <div className="flex items-center gap-1 mt-1">
@@ -102,10 +102,10 @@ export default async function Home() {
                     </h4>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-xs text-gray-400 line-through">
-                        $150.00
+                        Rp.150.000
                       </span>
                       <span className="text-sm font-bold text-gray-900">
-                        $130.00
+                        Rp.130.000
                       </span>
                     </div>
                     <div className="flex items-center gap-1 mt-1">
@@ -126,10 +126,10 @@ export default async function Home() {
                     </h4>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-xs text-gray-400 line-through">
-                        $150.00
+                        Rp.150.000
                       </span>
                       <span className="text-sm font-bold text-gray-900">
-                        $130.00
+                        Rp.130.000
                       </span>
                     </div>
                     <div className="flex items-center gap-1 mt-1">

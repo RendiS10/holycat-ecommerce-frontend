@@ -2,13 +2,12 @@
 import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-// [PERBAIKAN] Ubah ../../ menjadi ../
 import Header from "../components/Header";
-import { showSwalAlert } from "../lib/swalHelper"; // [PERBAIKAN] Ubah ../../ menjadi ../
+import { showSwalAlert } from "../lib/swalHelper";
 import Link from "next/link";
-import Swal from "sweetalert2";
+import Swal from "sweetalert2"; // Kita butuh Swal untuk konfirmasi
 
-// Helper (Gunakan underscore agar konsisten dengan DB)
+// Helper Status Style
 const getStatusStyle = (status) => {
   switch (status) {
     case "Selesai":
@@ -26,7 +25,7 @@ const getStatusStyle = (status) => {
       return "bg-yellow-100 text-yellow-700";
   }
 };
-// Helper lain (tidak berubah)
+
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -34,6 +33,7 @@ const formatCurrency = (amount) => {
     minimumFractionDigits: 0,
   }).format(amount);
 };
+
 const formatDate = (dateString) => {
   const options = { year: "numeric", month: "short", day: "numeric" };
   return new Date(dateString).toLocaleDateString("id-ID", options);
@@ -45,6 +45,7 @@ export default function OrdersPage() {
   const [error, setError] = useState(null);
   const router = useRouter();
 
+  // Fetch Orders
   const fetchOrders = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -52,15 +53,15 @@ export default function OrdersPage() {
       const res = await axios.get("http://localhost:4000/orders", {
         withCredentials: true,
       });
-      setOrders(res.data);
+      // Sort agar yang terbaru di atas
+      const sorted = res.data.sort((a, b) => b.id - a.id);
+      setOrders(sorted);
     } catch (err) {
       console.error("Fetch orders error:", err);
-      const status = err?.response?.status;
-      if (status === 401) {
+      if (err?.response?.status === 401) {
         router.push("/login?redirect=/orders");
       } else {
         setError("Gagal memuat riwayat pesanan.");
-        showSwalAlert("Error", "Gagal memuat riwayat pesanan.", "error");
       }
     } finally {
       setLoading(false);
@@ -71,166 +72,153 @@ export default function OrdersPage() {
     fetchOrders();
   }, [fetchOrders]);
 
-  // Fungsi untuk menghapus order
-  const handleDeleteOrder = async (e, orderId) => {
+  // [FITUR BARU] Handle Pesanan Diterima
+  const handleOrderReceived = async (e, orderId) => {
+    e.preventDefault(); // Mencegah link parent terklik
     e.stopPropagation();
-    e.preventDefault();
-
-    // Konfirmasi ulang
-    const orderToDelete = orders.find((o) => o.id === orderId);
-    if (
-      orderToDelete.status !== "Selesai" &&
-      orderToDelete.status !== "Dibatalkan"
-    ) {
-      showSwalAlert(
-        "Gagal",
-        `Pesanan dengan status ${orderToDelete.status.replace(
-          "_",
-          " "
-        )} tidak dapat dihapus.`,
-        "error"
-      );
-      return;
-    }
 
     const result = await Swal.fire({
-      title: "Hapus Riwayat?",
-      text: `Anda yakin ingin menghapus riwayat pesanan #${orderId}?`,
-      icon: "warning",
+      title: "Pesanan Sudah Diterima?",
+      text: "Pastikan barang sudah sampai dan sesuai. Status akan berubah menjadi 'Selesai'.",
+      icon: "question",
       showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Ya, Hapus!",
+      confirmButtonColor: "#44af7c", // Warna hijau
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Ya, Terima Barang",
       cancelButtonText: "Batal",
     });
 
-    if (!result.isConfirmed) {
-      return;
-    }
+    if (!result.isConfirmed) return;
 
     try {
-      await axios.delete(`http://localhost:4000/orders/${orderId}`, {
-        withCredentials: true,
-      });
-      setOrders((prevOrders) =>
-        prevOrders.filter((order) => order.id !== orderId)
+      // Panggil endpoint baru di backend
+      await axios.put(
+        `http://localhost:4000/orders/${orderId}/receive`,
+        {},
+        { withCredentials: true }
       );
-      showSwalAlert(
-        "Berhasil Dihapus",
-        `Riwayat pesanan #${orderId} telah dihapus.`,
-        "success"
+
+      // Update state lokal biar langsung berubah tanpa reload
+      setOrders((prev) =>
+        prev.map((o) => (o.id === orderId ? { ...o, status: "Selesai" } : o))
       );
+
+      showSwalAlert("Terima Kasih!", "Pesanan telah diselesaikan.", "success");
     } catch (err) {
-      console.error("Delete order error:", err);
-      const msg = err?.response?.data?.error || "Gagal menghapus pesanan.";
-      showSwalAlert("Gagal", msg, "error");
+      console.error("Receive order error:", err);
+      showSwalAlert("Gagal", "Terjadi kesalahan saat update status.", "error");
     }
   };
 
   return (
     <>
       <Header />
-      <br />
-      <br />
-      <br />
-      <br />
-      <div className="p-6 pt-5 max-w-4xl mx-auto">
+      <div className="pt-[100px]"></div> {/* Spacer Header */}
+      <div className="p-6 max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold mb-6 text-[#2b2b2b]">
           Riwayat Pesanan Saya
         </h1>
 
-        {loading && <p>Loading orders...</p>}
-        {error && <p className="text-red-600">{error}</p>}
+        {loading && (
+          <p className="text-center text-gray-500">Memuat pesanan...</p>
+        )}
+        {error && <p className="text-red-600 text-center">{error}</p>}
 
-        {!loading &&
-          !error &&
-          (orders.length === 0 ? (
-            <div className="text-center text-gray-600 bg-white p-8 rounded shadow">
-              Anda belum memiliki riwayat pesanan.
-              <Link href="/" className="text-blue-600 hover:underline ml-2">
-                Mulai Belanja
-              </Link>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {orders.map((order) => {
-                const statusStyle = getStatusStyle(order.status);
-                const firstItem = order.items?.[0]?.product;
+        {!loading && !error && orders.length === 0 ? (
+          <div className="text-center text-gray-600 bg-white p-12 rounded-lg shadow-sm border border-gray-100">
+            <p className="mb-4 text-lg">Anda belum memiliki riwayat pesanan.</p>
+            <Link
+              href="/"
+              className="inline-block bg-[#44af7c] text-white px-6 py-2 rounded-full hover:bg-[#369f6e] transition font-medium"
+            >
+              Mulai Belanja
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {orders.map((order) => {
+              const statusStyle = getStatusStyle(order.status);
+              const firstItem = order.items?.[0]?.product;
 
-                // Tentukan apakah tombol hapus boleh tampil
-                const canDelete =
-                  order.status === "Selesai" || order.status === "Dibatalkan";
-
-                return (
-                  <div
-                    key={order.id}
-                    className="bg-white rounded-lg shadow border flex flex-col sm:flex-row gap-4 items-center p-4"
-                  >
-                    {/* Preview Gambar */}
-                    <div className="w-16 h-16 bg-gray-100 rounded shrink-0 flex items-center justify-center text-gray-400 text-xs">
+              return (
+                <div
+                  key={order.id}
+                  className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition duration-200 overflow-hidden"
+                >
+                  <div className="p-4 flex flex-col sm:flex-row gap-4 items-center">
+                    {/* Gambar Produk */}
+                    <div className="w-20 h-20 bg-gray-100 rounded-lg shrink-0 overflow-hidden border border-gray-100">
                       {firstItem?.image ? (
                         <img
                           src={firstItem.image}
                           alt={firstItem.title}
-                          className="w-full h-full object-cover rounded"
+                          className="w-full h-full object-cover"
                         />
                       ) : (
-                        <span>No Image</span>
+                        <div className="flex items-center justify-center h-full text-gray-400 text-xs">
+                          No Img
+                        </div>
                       )}
                     </div>
 
-                    {/* Info Order (Dibungkus Link) */}
+                    {/* Detail Order (Link ke Detail) */}
                     <Link
                       href={`/order/${order.id}`}
-                      className="flex-1 block hover:bg-gray-50 p-2 rounded -m-2"
+                      className="flex-1 w-full sm:w-auto group"
                     >
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="font-semibold text-lg text-[#2b2b2b]">
-                          Order #{order.id}
-                        </span>
+                      <div className="flex justify-between items-start mb-1">
+                        <div>
+                          <span className="font-bold text-lg text-gray-800 group-hover:text-[#44af7c] transition">
+                            Order #{order.id}
+                          </span>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {formatDate(order.createdAt)}
+                          </p>
+                        </div>
                         <span
-                          className={`px-2 py-0.5 text-xs font-medium rounded-full ${statusStyle}`}
+                          className={`px-3 py-1 text-xs font-bold uppercase tracking-wide rounded-full ${statusStyle}`}
                         >
                           {order.status.replace("_", " ")}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-500 mb-2">
-                        {formatDate(order.createdAt)} -{" "}
-                        {formatCurrency(order.total)} -{" "}
-                        {order.paymentMethod?.replace("_", " ") || "N/A"}
-                      </p>
-                      {firstItem && (
-                        <p className="text-sm text-gray-600 truncate">
-                          {firstItem.title}
+
+                      <div className="mt-2 text-sm text-gray-600">
+                        <p className="font-medium text-gray-900">
+                          {formatCurrency(order.total)}
                         </p>
-                      )}
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          {order.paymentMethod?.replace("_", " ") ||
+                            "Metode N/A"}
+                        </p>
+                      </div>
                     </Link>
 
-                    {/* Tombol Hapus (Hanya tampil jika Selesai/Dibatalkan) */}
-                    <div className="self-center ml-auto pl-2">
-                      {canDelete ? (
+                    {/* [BAGIAN TOMBOL AKSI] */}
+                    <div className="flex flex-col gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+                      {/* Tombol Pesanan Diterima (Hanya jika status Dikirim) */}
+                      {order.status === "Dikirim" && (
                         <button
-                          onClick={(e) => handleDeleteOrder(e, order.id)}
-                          className="text-gray-400 hover:text-red-600 p-2"
-                          title="Hapus riwayat pesanan"
+                          onClick={(e) => handleOrderReceived(e, order.id)}
+                          className="bg-[#44af7c] hover:bg-[#369f6e] text-white text-xs font-bold py-2 px-4 rounded-lg shadow-sm transition transform active:scale-95 whitespace-nowrap"
                         >
-                          <i className="fas fa-trash-alt"></i>
+                          Pesanan Diterima
                         </button>
-                      ) : (
-                        // Tampilkan panah jika tidak bisa dihapus, agar tetap konsisten
-                        <Link
-                          href={`/order/${order.id}`}
-                          className="text-gray-400 p-2"
-                        >
-                          <i className="fas fa-chevron-right"></i>
-                        </Link>
                       )}
+
+                      {/* Tombol Detail (Selalu Ada) */}
+                      <Link
+                        href={`/order/${order.id}`}
+                        className="bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-bold py-2 px-4 rounded-lg text-center transition whitespace-nowrap"
+                      >
+                        Detail
+                      </Link>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          ))}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </>
   );
